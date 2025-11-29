@@ -1,0 +1,27 @@
+{
+  "name": "welloff-ai-platform",
+  "version": "1.0.0",
+  "description": "Powerful AI platform with conversational AI, Milvus vector database, n8n workflow automation, multimodal RAG, and AI Voice Agent",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test src/**/*.test.js"
+  },
+  "keywords": [
+    "ai",
+    "conversational-ai",
+    "milvus",
+    "n8n",
+    "rag",
+    "voice-agent",
+    "multimodal"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
