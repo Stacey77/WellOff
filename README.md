@@ -34,6 +34,13 @@ A powerful AI platform that sets itself apart from other vibe-coding tools by pr
 - Voice session management
 - Multiple voice options and languages
 
+### 🍌 Nano Banana Pro AI Inference
+- Efficient AI text generation and chat
+- Multimodal processing (text, image, audio)
+- Embeddings creation for semantic search
+- Multiple specialized models (vision, audio)
+- Edge-optimized for resource-constrained environments
+
 ## 🚀 Quick Start
 
 ```javascript
@@ -44,7 +51,8 @@ const platform = await createPlatform({
   milvusHost: 'localhost',
   milvusPort: 19530,
   n8nWebhookUrl: 'http://localhost:5678',
-  voiceEnabled: true
+  voiceEnabled: true,
+  nanoBananaEnabled: true
 });
 
 // Process a request with confirmation
@@ -54,6 +62,12 @@ const response = await platform.processRequest('Create a new marketing campaign'
 console.log(response.message);  // Explains what will be done
 console.log(response.question); // "Is this what you want?"
 console.log(response.options);  // ['Yes, proceed', 'No, let me clarify', 'Modify this']
+
+// Chat with Nano Banana Pro
+const chatResponse = await platform.chat([
+  { role: 'user', content: 'Hello, how can you help me?' }
+]);
+console.log(chatResponse.choices[0].message.content);
 ```
 
 ## 📦 Installation
@@ -76,6 +90,8 @@ src/
 │   └── MilvusClient.js      # Milvus vector database client
 ├── n8n/
 │   └── N8NIntegration.js    # n8n workflow automation
+├── nanobanana/
+│   └── NanoBananaPro.js     # Nano Banana Pro AI inference
 ├── rag/
 │   └── MultimodalRAG.js     # Multimodal RAG system
 └── voice/

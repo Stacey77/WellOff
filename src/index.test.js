@@ -11,6 +11,7 @@ import { MilvusClient } from './milvus/MilvusClient.js';
 import { N8NIntegration } from './n8n/N8NIntegration.js';
 import { MultimodalRAG } from './rag/MultimodalRAG.js';
 import { VoiceAgent } from './voice/VoiceAgent.js';
+import { NanoBananaPro } from './nanobanana/NanoBananaPro.js';
 
 describe('WellOff Platform', () => {
   test('should create platform instance', () => {
@@ -21,6 +22,7 @@ describe('WellOff Platform', () => {
     assert.ok(platform.n8nIntegration);
     assert.ok(platform.rag);
     assert.ok(platform.voiceAgent);
+    assert.ok(platform.nanoBananaPro);
   });
 
   test('should initialize platform', async () => {
@@ -294,6 +296,91 @@ describe('Voice Agent', () => {
     assert.ok(voices[0].name);
     
     await voice.shutdown();
+  });
+});
+
+describe('Nano Banana Pro', () => {
+  test('should initialize', async () => {
+    const nanoBanana = new NanoBananaPro();
+    await nanoBanana.initialize();
+    
+    assert.strictEqual(nanoBanana.initialized, true);
+    
+    await nanoBanana.shutdown();
+  });
+
+  test('should generate text', async () => {
+    const nanoBanana = new NanoBananaPro();
+    await nanoBanana.initialize();
+    
+    const result = await nanoBanana.generate('Hello world');
+    
+    assert.ok(result.id);
+    assert.ok(result.choices);
+    assert.ok(result.choices.length > 0);
+    assert.ok(result.usage);
+    
+    await nanoBanana.shutdown();
+  });
+
+  test('should chat', async () => {
+    const nanoBanana = new NanoBananaPro();
+    await nanoBanana.initialize();
+    
+    const result = await nanoBanana.chat([
+      { role: 'user', content: 'Hello!' }
+    ]);
+    
+    assert.ok(result.id);
+    assert.ok(result.choices[0].message);
+    assert.strictEqual(result.choices[0].message.role, 'assistant');
+    
+    await nanoBanana.shutdown();
+  });
+
+  test('should create embeddings', async () => {
+    const nanoBanana = new NanoBananaPro();
+    await nanoBanana.initialize();
+    
+    const result = await nanoBanana.createEmbedding('Test text');
+    
+    assert.ok(result.data);
+    assert.ok(result.data.length > 0);
+    assert.ok(result.data[0].embedding);
+    assert.ok(result.data[0].embedding.length === 768);
+    
+    await nanoBanana.shutdown();
+  });
+
+  test('should process multimodal input', async () => {
+    const nanoBanana = new NanoBananaPro();
+    await nanoBanana.initialize();
+    
+    const result = await nanoBanana.processMultimodal({
+      text: 'Describe this',
+      image: Buffer.from('fake-image')
+    });
+    
+    assert.ok(result.modalities.text);
+    assert.ok(result.modalities.image);
+    assert.ok(result.analysis);
+    
+    await nanoBanana.shutdown();
+  });
+
+  test('should list available models', async () => {
+    const nanoBanana = new NanoBananaPro();
+    await nanoBanana.initialize();
+    
+    const models = nanoBanana.listModels();
+    
+    assert.ok(Array.isArray(models));
+    assert.ok(models.length >= 3);
+    assert.ok(models.find(m => m.id === 'nano-banana-pro-v1'));
+    assert.ok(models.find(m => m.id === 'nano-banana-vision'));
+    assert.ok(models.find(m => m.id === 'nano-banana-audio'));
+    
+    await nanoBanana.shutdown();
   });
 });
 

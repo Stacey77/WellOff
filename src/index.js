@@ -7,6 +7,7 @@
  * - n8n workflow automation
  * - Multimodal RAG (Retrieval-Augmented Generation)
  * - AI Voice Agent for voice interactions
+ * - Nano Banana Pro for efficient AI inference
  */
 
 import { WellOffPlatform } from './core/WellOffPlatform.js';
@@ -20,6 +21,7 @@ export { MilvusClient } from './milvus/MilvusClient.js';
 export { N8NIntegration } from './n8n/N8NIntegration.js';
 export { MultimodalRAG } from './rag/MultimodalRAG.js';
 export { VoiceAgent } from './voice/VoiceAgent.js';
+export { NanoBananaPro } from './nanobanana/NanoBananaPro.js';
 
 /**
  * Quick start function to create and initialize the platform
@@ -44,6 +46,7 @@ async function main() {
   console.log('  ⚙️  n8n Workflow Automation');
   console.log('  📚 Multimodal RAG (Text, Image, Audio)');
   console.log('  🎙️  AI Voice Agent');
+  console.log('  🍌 Nano Banana Pro AI Inference');
   console.log('');
 
   try {
@@ -52,7 +55,8 @@ async function main() {
       milvusHost: 'localhost',
       milvusPort: 19530,
       n8nWebhookUrl: 'http://localhost:5678',
-      voiceEnabled: true
+      voiceEnabled: true,
+      nanoBananaEnabled: true
     });
 
     console.log('');
@@ -91,6 +95,17 @@ async function main() {
       text: 'Find information about AI assistants'
     });
     console.log(`RAG Query processed: ${ragResult.augmentedResponse.response}`);
+    console.log('');
+
+    // Demo Nano Banana Pro
+    console.log('─────────────────────────────────────────────────────────────');
+    console.log('Demo: Nano Banana Pro AI Generation...');
+    console.log('');
+    
+    const chatResult = await platform.chat([
+      { role: 'user', content: 'Hello, what can you help me with?' }
+    ]);
+    console.log(`Nano Banana Pro: ${chatResult.choices[0].message.content}`);
     console.log('');
 
     // Shutdown

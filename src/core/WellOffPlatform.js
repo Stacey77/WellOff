@@ -7,6 +7,7 @@
  * - n8n workflow automation
  * - Multimodal RAG
  * - AI Voice Agent
+ * - Nano Banana Pro AI inference
  */
 
 import { ConversationalAI } from '../conversational/ConversationalAI.js';
@@ -14,6 +15,7 @@ import { MilvusClient } from '../milvus/MilvusClient.js';
 import { N8NIntegration } from '../n8n/N8NIntegration.js';
 import { MultimodalRAG } from '../rag/MultimodalRAG.js';
 import { VoiceAgent } from '../voice/VoiceAgent.js';
+import { NanoBananaPro } from '../nanobanana/NanoBananaPro.js';
 
 export class WellOffPlatform {
   constructor(config = {}) {
@@ -22,6 +24,7 @@ export class WellOffPlatform {
       milvusPort: config.milvusPort || 19530,
       n8nWebhookUrl: config.n8nWebhookUrl || 'http://localhost:5678',
       voiceEnabled: config.voiceEnabled !== false,
+      nanoBananaEnabled: config.nanoBananaEnabled !== false,
       ...config
     };
 
@@ -30,6 +33,7 @@ export class WellOffPlatform {
     this.n8nIntegration = new N8NIntegration(this.config);
     this.rag = new MultimodalRAG(this.milvusClient);
     this.voiceAgent = new VoiceAgent(this.conversationalAI);
+    this.nanoBananaPro = new NanoBananaPro(this.config);
   }
 
   /**
@@ -44,6 +48,10 @@ export class WellOffPlatform {
     
     if (this.config.voiceEnabled) {
       await this.voiceAgent.initialize();
+    }
+
+    if (this.config.nanoBananaEnabled) {
+      await this.nanoBananaPro.initialize();
     }
     
     console.log('✅ WellOff AI Platform initialized successfully!');
@@ -89,6 +97,26 @@ export class WellOffPlatform {
   }
 
   /**
+   * Generate AI response using Nano Banana Pro
+   * @param {string} prompt - The prompt to generate from
+   * @param {Object} options - Generation options
+   * @returns {Promise<Object>} - Generated response
+   */
+  async generate(prompt, options = {}) {
+    return this.nanoBananaPro.generate(prompt, options);
+  }
+
+  /**
+   * Chat with AI using Nano Banana Pro
+   * @param {Array} messages - Chat messages
+   * @param {Object} options - Chat options
+   * @returns {Promise<Object>} - Chat response
+   */
+  async chat(messages, options = {}) {
+    return this.nanoBananaPro.chat(messages, options);
+  }
+
+  /**
    * Shutdown the platform gracefully
    */
   async shutdown() {
@@ -99,6 +127,10 @@ export class WellOffPlatform {
     
     if (this.config.voiceEnabled) {
       await this.voiceAgent.shutdown();
+    }
+
+    if (this.config.nanoBananaEnabled) {
+      await this.nanoBananaPro.shutdown();
     }
     
     console.log('👋 WellOff AI Platform shut down successfully!');
