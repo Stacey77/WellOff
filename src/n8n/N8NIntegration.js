@@ -253,14 +253,14 @@ export class N8NIntegration {
    * Generate workflow ID
    */
   generateWorkflowId() {
-    return `wf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `wf_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**
    * Generate execution ID
    */
   generateExecutionId() {
-    return `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `exec_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**
