@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WellOff AI Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .feature-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,212,255,0.2);
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+        
+        .feature-title {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #00d4ff;
+        }
+        
+        .feature-desc {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .chat-section {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 40px 0;
+        }
+        
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .chat-header h2 {
+            color: #00d4ff;
+        }
+        
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            padding: 16px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .message {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+        
+        .message.user {
+            background: #7c3aed;
+            margin-left: auto;
+        }
+        
+        .message.ai {
+            background: rgba(0,212,255,0.2);
+            border: 1px solid rgba(0,212,255,0.3);
+        }
+        
+        .message.confirmation {
+            background: rgba(244,114,182,0.2);
+            border: 1px solid rgba(244,114,182,0.3);
+        }
+        
+        .confirmation-options {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .confirmation-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: transform 0.2s;
+        }
+        
+        .confirmation-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .confirmation-btn.yes {
+            background: #10b981;
+            color: white;
+        }
+        
+        .confirmation-btn.no {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .confirmation-btn.modify {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.3);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+        
+        .chat-input::placeholder {
+            color: #64748b;
+        }
+        
+        .send-btn {
+            padding: 14px 28px;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,212,255,0.4);
+        }
+        
+        .voice-btn {
+            padding: 14px;
+            background: rgba(244,114,182,0.3);
+            border: 1px solid rgba(244,114,182,0.5);
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .voice-btn:hover {
+            background: rgba(244,114,182,0.5);
+        }
+        
+        .voice-btn.recording {
+            background: #ef4444;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .status-bar {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+        
+        .status-dot.inactive {
+            background: #64748b;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #64748b;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 WellOff AI Platform</h1>
+            <p class="subtitle">Powerful AI that asks "Is this what you want?" before executing</p>
+        </header>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">Conversational AI</h3>
+                <p class="feature-desc">Natural language processing with confirmation flows. Always verifies your intent before taking action.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3 class="feature-title">Milvus Vector Search</h3>
+                <p class="feature-desc">High-performance similarity search with vector embeddings and hybrid search capabilities.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚙️</div>
+                <h3 class="feature-title">n8n Automation</h3>
+                <p class="feature-desc">Workflow automation with webhook triggers and AI-powered action generation.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3 class="feature-title">Multimodal RAG</h3>
+                <p class="feature-desc">Retrieve context from text, images, and audio for augmented AI responses.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎙️</div>
+                <h3 class="feature-title">Voice Agent</h3>
+                <p class="feature-desc">Speech-to-text and text-to-speech with multi-language support.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🍌</div>
+                <h3 class="feature-title">Nano Banana Pro</h3>
+                <p class="feature-desc">AI text generation, embeddings, and multimodal processing (vision, audio).</p>
+            </div>
+        </div>
+        
+        <div class="chat-section">
+            <div class="chat-header">
+                <span style="font-size: 1.5rem;">💬</span>
+                <h2>Chat with WellOff AI</h2>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai">
+                    👋 Hello! I'm WellOff AI. I always ask for confirmation before executing any action. How can I help you today?
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <button class="voice-btn" id="voiceBtn" title="Voice input">🎤</button>
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type your request... (e.g., 'Create a new marketing campaign')">
+                <button class="send-btn" id="sendBtn">Send</button>
+            </div>
+            
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>Milvus Connected</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>n8n Ready</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>RAG Initialized</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>Voice Agent Active</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>Nano Banana Pro Ready</span>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>WellOff AI Platform v1.0.0 | Built with 🤖 Conversational AI, 🔍 Milvus, ⚙️ n8n, 📚 RAG, 🎙️ Voice, 🍌 Nano Banana Pro</p>
+        </footer>
+    </div>
+    
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const voiceBtn = document.getElementById('voiceBtn');
+        
+        function addMessage(content, type = 'ai') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = content;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function addConfirmation(action) {
+            const content = `
+                <strong>🤔 Confirmation Required</strong><br><br>
+                I understand you want me to: <strong>${action}</strong><br><br>
+                Here's what I'll do:<br>
+                1. Analyze requirements<br>
+                2. Generate structure<br>
+                3. Create content<br>
+                4. Review and finalize<br><br>
+                <strong>Is this what you want?</strong>
+                <div class="confirmation-options">
+                    <button class="confirmation-btn yes" onclick="handleConfirmation('yes')">✓ Yes, proceed</button>
+                    <button class="confirmation-btn no" onclick="handleConfirmation('no')">✗ No, let me clarify</button>
+                    <button class="confirmation-btn modify" onclick="handleConfirmation('modify')">✎ Modify this</button>
+                </div>
+            `;
+            addMessage(content, 'confirmation');
+        }
+        
+        function handleConfirmation(response) {
+            if (response === 'yes') {
+                addMessage("Great! I'm proceeding with the action... ✅ Action completed successfully!", 'ai');
+            } else if (response === 'no') {
+                addMessage("No problem! Please clarify what you'd like me to do instead.", 'ai');
+            } else {
+                addMessage("Sure! What would you like to modify about this action?", 'ai');
+            }
+        }
+        
+        function handleSend() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            addMessage(text, 'user');
+            chatInput.value = '';
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                addConfirmation(text);
+            }, 500);
+        }
+        
+        sendBtn.addEventListener('click', handleSend);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+        
+        let isRecording = false;
+        voiceBtn.addEventListener('click', () => {
+            isRecording = !isRecording;
+            voiceBtn.classList.toggle('recording', isRecording);
+            voiceBtn.textContent = isRecording ? '⏹️' : '🎤';
+            
+            if (!isRecording) {
+                addMessage("🎤 Voice input received: 'Create a new project for me'", 'user');
+                setTimeout(() => {
+                    addConfirmation("Create a new project");
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>
