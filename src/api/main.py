@@ -8,6 +8,8 @@ enabling interaction with all platform capabilities.
 from typing import Dict, Any, Optional, List
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import asyncio
 import sys
@@ -110,6 +112,14 @@ def create_app() -> FastAPI:
     # Connect to Milvus
     app.state.milvus_client.connect()
     
+    # Store static directory path for reuse
+    app.state.static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
+    app.state.gui_path = os.path.join(app.state.static_dir, "index.html")
+    
+    # Mount static files for GUI
+    if os.path.exists(app.state.static_dir):
+        app.mount("/static", StaticFiles(directory=app.state.static_dir), name="static")
+    
     return app
 
 
@@ -118,9 +128,19 @@ app = create_app()
 
 # ============= Health & Info Endpoints =============
 
+@app.get("/gui", tags=["Info"])
+async def serve_gui():
+    """Serve the GUI interface."""
+    if os.path.exists(app.state.gui_path):
+        return FileResponse(app.state.gui_path)
+    raise HTTPException(status_code=404, detail="GUI not found")
+
+
 @app.get("/", tags=["Info"])
 async def root():
-    """Root endpoint with platform information."""
+    """Root endpoint - redirects to GUI or returns API info."""
+    if os.path.exists(app.state.gui_path):
+        return FileResponse(app.state.gui_path)
     return {
         "name": "WellOff AI Platform",
         "version": "1.0.0",
@@ -133,6 +153,7 @@ async def root():
             "AI Voice Agent"
         ],
         "endpoints": {
+            "gui": "/gui",
             "docs": "/docs",
             "health": "/health",
             "conversation": "/api/conversation",
