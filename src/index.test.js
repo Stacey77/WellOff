@@ -12,6 +12,7 @@ import { N8NIntegration } from './n8n/N8NIntegration.js';
 import { MultimodalRAG } from './rag/MultimodalRAG.js';
 import { VoiceAgent } from './voice/VoiceAgent.js';
 import { NanoBananaPro } from './nanobanana/NanoBananaPro.js';
+import { NestIntegration, Module, Controller, Guard, Interceptor, Middleware } from './nest/NestIntegration.js';
 
 describe('WellOff Platform', () => {
   test('should create platform instance', () => {
@@ -23,6 +24,7 @@ describe('WellOff Platform', () => {
     assert.ok(platform.rag);
     assert.ok(platform.voiceAgent);
     assert.ok(platform.nanoBananaPro);
+    assert.ok(platform.nest);
   });
 
   test('should initialize platform', async () => {
@@ -381,6 +383,127 @@ describe('Nano Banana Pro', () => {
     assert.ok(models.find(m => m.id === 'nano-banana-audio'));
     
     await nanoBanana.shutdown();
+  });
+});
+
+describe('Nest Integration', () => {
+  test('should initialize', async () => {
+    const nest = new NestIntegration();
+    await nest.initialize();
+    
+    assert.strictEqual(nest.initialized, true);
+    
+    await nest.shutdown();
+  });
+
+  test('should register and resolve services', async () => {
+    const nest = new NestIntegration();
+    await nest.initialize();
+    
+    const configService = nest.get('ConfigService');
+    assert.ok(configService);
+    assert.ok(typeof configService.get === 'function');
+    
+    const loggerService = nest.get('LoggerService');
+    assert.ok(loggerService);
+    assert.ok(typeof loggerService.log === 'function');
+    
+    await nest.shutdown();
+  });
+
+  test('should handle request routing', async () => {
+    const nest = new NestIntegration();
+    
+    // Create a test controller
+    class TestController extends Controller {
+      constructor() {
+        super('/test');
+        this.get('/', async (ctx) => ({ message: 'Hello from test' }));
+        this.post('/create', async (ctx) => ({ created: true, body: ctx.body }));
+      }
+    }
+    
+    // Create a test module
+    class TestModule extends Module {
+      constructor() {
+        super({
+          controllers: [TestController],
+          providers: []
+        });
+      }
+    }
+    
+    nest.registerModule(TestModule);
+    await nest.initialize();
+    
+    // Test GET request
+    const getResult = await nest.handleRequest('GET', '/test/');
+    assert.strictEqual(getResult.statusCode, 200);
+    assert.strictEqual(getResult.data.message, 'Hello from test');
+    
+    // Test POST request
+    const postResult = await nest.handleRequest('POST', '/test/create', { name: 'test' });
+    assert.strictEqual(postResult.statusCode, 200);
+    assert.strictEqual(postResult.data.created, true);
+    
+    await nest.shutdown();
+  });
+
+  test('should handle 404 for unknown routes', async () => {
+    const nest = new NestIntegration();
+    await nest.initialize();
+    
+    const result = await nest.handleRequest('GET', '/unknown');
+    assert.strictEqual(result.statusCode, 404);
+    
+    await nest.shutdown();
+  });
+
+  test('should support guards', async () => {
+    const nest = new NestIntegration();
+    
+    // Create a guard that blocks access
+    class BlockGuard extends Guard {
+      async canActivate(context) {
+        return false;
+      }
+    }
+    
+    nest.useGlobalGuard(new BlockGuard());
+    await nest.initialize();
+    
+    const result = await nest.handleRequest('GET', '/any');
+    assert.strictEqual(result.statusCode, 403);
+    
+    await nest.shutdown();
+  });
+
+  test('should extract route parameters', async () => {
+    const nest = new NestIntegration();
+    
+    class UserController extends Controller {
+      constructor() {
+        super('/users');
+        this.get('/:id', async (ctx) => ({ userId: ctx.params.id }));
+      }
+    }
+    
+    class UserModule extends Module {
+      constructor() {
+        super({
+          controllers: [UserController]
+        });
+      }
+    }
+    
+    nest.registerModule(UserModule);
+    await nest.initialize();
+    
+    const result = await nest.handleRequest('GET', '/users/123');
+    assert.strictEqual(result.statusCode, 200);
+    assert.strictEqual(result.data.userId, '123');
+    
+    await nest.shutdown();
   });
 });
 

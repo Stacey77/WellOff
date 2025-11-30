@@ -8,6 +8,7 @@
  * - Multimodal RAG
  * - AI Voice Agent
  * - Nano Banana Pro AI inference
+ * - NestJS-style modular architecture
  */
 
 import { ConversationalAI } from '../conversational/ConversationalAI.js';
@@ -16,6 +17,7 @@ import { N8NIntegration } from '../n8n/N8NIntegration.js';
 import { MultimodalRAG } from '../rag/MultimodalRAG.js';
 import { VoiceAgent } from '../voice/VoiceAgent.js';
 import { NanoBananaPro } from '../nanobanana/NanoBananaPro.js';
+import { NestIntegration } from '../nest/NestIntegration.js';
 
 export class WellOffPlatform {
   constructor(config = {}) {
@@ -25,6 +27,7 @@ export class WellOffPlatform {
       n8nWebhookUrl: config.n8nWebhookUrl || 'http://localhost:5678',
       voiceEnabled: config.voiceEnabled !== false,
       nanoBananaEnabled: config.nanoBananaEnabled !== false,
+      nestEnabled: config.nestEnabled !== false,
       ...config
     };
 
@@ -34,6 +37,7 @@ export class WellOffPlatform {
     this.rag = new MultimodalRAG(this.milvusClient);
     this.voiceAgent = new VoiceAgent(this.conversationalAI);
     this.nanoBananaPro = new NanoBananaPro(this.config);
+    this.nest = new NestIntegration(this.config);
   }
 
   /**
@@ -52,6 +56,10 @@ export class WellOffPlatform {
 
     if (this.config.nanoBananaEnabled) {
       await this.nanoBananaPro.initialize();
+    }
+
+    if (this.config.nestEnabled) {
+      await this.nest.initialize();
     }
     
     console.log('✅ WellOff AI Platform initialized successfully!');
@@ -131,6 +139,10 @@ export class WellOffPlatform {
 
     if (this.config.nanoBananaEnabled) {
       await this.nanoBananaPro.shutdown();
+    }
+
+    if (this.config.nestEnabled) {
+      await this.nest.shutdown();
     }
     
     console.log('👋 WellOff AI Platform shut down successfully!');

@@ -8,6 +8,7 @@
  * - Multimodal RAG (Retrieval-Augmented Generation)
  * - AI Voice Agent for voice interactions
  * - Nano Banana Pro for efficient AI inference
+ * - NestJS-style modular architecture
  */
 
 import { WellOffPlatform } from './core/WellOffPlatform.js';
@@ -22,6 +23,7 @@ export { N8NIntegration } from './n8n/N8NIntegration.js';
 export { MultimodalRAG } from './rag/MultimodalRAG.js';
 export { VoiceAgent } from './voice/VoiceAgent.js';
 export { NanoBananaPro } from './nanobanana/NanoBananaPro.js';
+export { NestIntegration, Module, Controller, Guard, Interceptor, Middleware } from './nest/NestIntegration.js';
 
 /**
  * Quick start function to create and initialize the platform
@@ -47,6 +49,7 @@ async function main() {
   console.log('  📚 Multimodal RAG (Text, Image, Audio)');
   console.log('  🎙️  AI Voice Agent');
   console.log('  🍌 Nano Banana Pro AI Inference');
+  console.log('  🪺 NestJS-style Modular Architecture');
   console.log('');
 
   try {
@@ -56,7 +59,8 @@ async function main() {
       milvusPort: 19530,
       n8nWebhookUrl: 'http://localhost:5678',
       voiceEnabled: true,
-      nanoBananaEnabled: true
+      nanoBananaEnabled: true,
+      nestEnabled: true
     });
 
     console.log('');
@@ -106,6 +110,15 @@ async function main() {
       { role: 'user', content: 'Hello, what can you help me with?' }
     ]);
     console.log(`Nano Banana Pro: ${chatResult.choices[0].message.content}`);
+    console.log('');
+
+    // Demo Nest Integration
+    console.log('─────────────────────────────────────────────────────────────');
+    console.log('Demo: NestJS-style API...');
+    console.log('');
+    
+    console.log('Nest Integration Status: Initialized');
+    console.log('Available services: ConfigService, LoggerService');
     console.log('');
 
     // Shutdown

@@ -41,6 +41,13 @@ A powerful AI platform that sets itself apart from other vibe-coding tools by pr
 - Multiple specialized models (vision, audio)
 - Edge-optimized for resource-constrained environments
 
+### 🪺 NestJS-style Modular Architecture
+- Dependency injection container
+- Module system for organizing functionality
+- Controller/Service pattern
+- Middleware, Guards, and Interceptors support
+- Request routing and parameter extraction
+
 ## 🚀 Quick Start
 
 ```javascript
@@ -52,7 +59,8 @@ const platform = await createPlatform({
   milvusPort: 19530,
   n8nWebhookUrl: 'http://localhost:5678',
   voiceEnabled: true,
-  nanoBananaEnabled: true
+  nanoBananaEnabled: true,
+  nestEnabled: true
 });
 
 // Process a request with confirmation
@@ -92,6 +100,8 @@ src/
 │   └── N8NIntegration.js    # n8n workflow automation
 ├── nanobanana/
 │   └── NanoBananaPro.js     # Nano Banana Pro AI inference
+├── nest/
+│   └── NestIntegration.js   # NestJS-style modular architecture
 ├── rag/
 │   └── MultimodalRAG.js     # Multimodal RAG system
 └── voice/
