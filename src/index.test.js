@@ -13,6 +13,8 @@ import { MultimodalRAG } from './rag/MultimodalRAG.js';
 import { VoiceAgent } from './voice/VoiceAgent.js';
 import { NanoBananaPro } from './nanobanana/NanoBananaPro.js';
 import { NestIntegration, Module, Controller, Guard, Interceptor, Middleware } from './nest/NestIntegration.js';
+import { APIServer } from './api/APIServer.js';
+import { WebSocketServer } from './api/WebSocketServer.js';
 
 describe('WellOff Platform', () => {
   test('should create platform instance', () => {
@@ -504,6 +506,188 @@ describe('Nest Integration', () => {
     assert.strictEqual(result.data.userId, '123');
     
     await nest.shutdown();
+  });
+});
+
+describe('API Server', () => {
+  test('should create API server instance', async () => {
+    const platform = new WellOffPlatform();
+    await platform.initialize();
+    
+    const apiServer = new APIServer(platform);
+    assert.ok(apiServer);
+    assert.ok(apiServer.routes.size > 0);
+    
+    await platform.shutdown();
+  });
+
+  test('should have health endpoint', async () => {
+    const platform = new WellOffPlatform();
+    await platform.initialize();
+    
+    const apiServer = new APIServer(platform);
+    const healthHandler = apiServer.routes.get('GET:/api/health');
+    
+    assert.ok(healthHandler);
+    const result = await healthHandler({});
+    assert.strictEqual(result.status, 'healthy');
+    assert.ok(result.timestamp);
+    
+    await platform.shutdown();
+  });
+
+  test('should have info endpoint', async () => {
+    const platform = new WellOffPlatform();
+    await platform.initialize();
+    
+    const apiServer = new APIServer(platform);
+    const infoHandler = apiServer.routes.get('GET:/api/info');
+    
+    assert.ok(infoHandler);
+    const result = await infoHandler({});
+    assert.strictEqual(result.name, 'WellOff AI Platform');
+    assert.ok(result.components);
+    
+    await platform.shutdown();
+  });
+
+  test('should add custom routes', async () => {
+    const platform = new WellOffPlatform();
+    await platform.initialize();
+    
+    const apiServer = new APIServer(platform);
+    apiServer.addRoute('GET', '/api/custom', async () => ({ custom: true }));
+    
+    const customHandler = apiServer.routes.get('GET:/api/custom');
+    assert.ok(customHandler);
+    const result = await customHandler({});
+    assert.strictEqual(result.custom, true);
+    
+    await platform.shutdown();
+  });
+
+  test('should support middleware', async () => {
+    const platform = new WellOffPlatform();
+    await platform.initialize();
+    
+    const apiServer = new APIServer(platform);
+    let middlewareCalled = false;
+    
+    apiServer.use(async (ctx) => {
+      middlewareCalled = true;
+      ctx.modified = true;
+    });
+    
+    assert.ok(apiServer.middlewares.length > 0);
+    
+    await platform.shutdown();
+  });
+});
+
+describe('WebSocket Server', () => {
+  test('should create WebSocket server instance', async () => {
+    const wsServer = new WebSocketServer();
+    assert.ok(wsServer);
+    assert.ok(wsServer.clients instanceof Map);
+    assert.ok(wsServer.rooms instanceof Map);
+  });
+
+  test('should handle client connections', async () => {
+    const wsServer = new WebSocketServer();
+    await wsServer.initialize();
+    
+    const client = wsServer.connect('client1', { name: 'Test Client' });
+    assert.ok(client);
+    assert.strictEqual(client.id, 'client1');
+    assert.strictEqual(wsServer.clients.size, 1);
+    
+    await wsServer.shutdown();
+  });
+
+  test('should handle client disconnections', async () => {
+    const wsServer = new WebSocketServer();
+    await wsServer.initialize();
+    
+    wsServer.connect('client1');
+    assert.strictEqual(wsServer.clients.size, 1);
+    
+    wsServer.disconnect('client1');
+    assert.strictEqual(wsServer.clients.size, 0);
+    
+    await wsServer.shutdown();
+  });
+
+  test('should manage rooms', async () => {
+    const wsServer = new WebSocketServer();
+    await wsServer.initialize();
+    
+    wsServer.connect('client1');
+    wsServer.connect('client2');
+    
+    wsServer.joinRoom('client1', 'room1');
+    wsServer.joinRoom('client2', 'room1');
+    
+    const members = wsServer.getRoomMembers('room1');
+    assert.strictEqual(members.length, 2);
+    assert.ok(members.includes('client1'));
+    assert.ok(members.includes('client2'));
+    
+    wsServer.leaveRoom('client1', 'room1');
+    const membersAfter = wsServer.getRoomMembers('room1');
+    assert.strictEqual(membersAfter.length, 1);
+    
+    await wsServer.shutdown();
+  });
+
+  test('should handle messages', async () => {
+    const wsServer = new WebSocketServer();
+    await wsServer.initialize();
+    
+    wsServer.connect('client1');
+    
+    let pingReceived = false;
+    wsServer.on('outgoing', ({ clientId, message }) => {
+      if (message.type === 'pong') {
+        pingReceived = true;
+      }
+    });
+    
+    wsServer.handleMessage('client1', { type: 'ping' });
+    assert.ok(pingReceived);
+    
+    await wsServer.shutdown();
+  });
+
+  test('should broadcast messages', async () => {
+    const wsServer = new WebSocketServer();
+    await wsServer.initialize();
+    
+    wsServer.connect('client1');
+    wsServer.connect('client2');
+    wsServer.connect('client3');
+    
+    let receivedCount = 0;
+    wsServer.on('outgoing', () => receivedCount++);
+    
+    wsServer.broadcast({ type: 'announcement', data: 'Hello all' });
+    assert.strictEqual(receivedCount, 3);
+    
+    await wsServer.shutdown();
+  });
+
+  test('should get stats', async () => {
+    const wsServer = new WebSocketServer();
+    await wsServer.initialize();
+    
+    wsServer.connect('client1');
+    wsServer.connect('client2');
+    wsServer.joinRoom('client1', 'room1');
+    
+    const stats = wsServer.getStats();
+    assert.strictEqual(stats.totalClients, 2);
+    assert.strictEqual(stats.totalRooms, 1);
+    
+    await wsServer.shutdown();
   });
 });
 

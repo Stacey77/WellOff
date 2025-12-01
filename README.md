@@ -48,10 +48,17 @@ A powerful AI platform that sets itself apart from other vibe-coding tools by pr
 - Middleware, Guards, and Interceptors support
 - Request routing and parameter extraction
 
+### 🌐 REST API & WebSocket
+- Full REST API for all platform features
+- Real-time WebSocket communication
+- Room-based messaging
+- Streaming responses
+- CORS support
+
 ## 🚀 Quick Start
 
 ```javascript
-import { createPlatform } from 'welloff-ai-platform';
+import { createPlatform, APIServer, WebSocketServer } from 'welloff-ai-platform';
 
 // Create and initialize the platform
 const platform = await createPlatform({
@@ -92,6 +99,9 @@ src/
 ├── index.js                 # Main entry point
 ├── core/
 │   └── WellOffPlatform.js   # Platform orchestrator
+├── api/
+│   ├── APIServer.js         # REST API server
+│   └── WebSocketServer.js   # Real-time WebSocket server
 ├── conversational/
 │   └── ConversationalAI.js  # Conversational AI with confirmation
 ├── milvus/
@@ -106,6 +116,28 @@ src/
 │   └── MultimodalRAG.js     # Multimodal RAG system
 └── voice/
     └── VoiceAgent.js        # AI Voice Agent
+```
+
+## 🌐 API Endpoints
+
+```
+GET  /api/health              - Health check
+GET  /api/info                - Platform information
+POST /api/chat                - Send chat message
+POST /api/chat/confirm        - Confirm/modify action
+POST /api/vectors/search      - Vector similarity search
+POST /api/vectors/insert      - Insert vectors
+GET  /api/vectors/collections - List collections
+POST /api/workflows/execute   - Execute workflow
+POST /api/workflows/create    - Create workflow
+GET  /api/workflows           - List workflows
+POST /api/rag/query           - RAG query
+POST /api/rag/ingest          - Ingest documents
+POST /api/voice/transcribe    - Transcribe audio
+POST /api/voice/synthesize    - Synthesize speech
+POST /api/generate            - Generate text
+POST /api/generate/chat       - Chat completion
+POST /api/generate/embeddings - Create embeddings
 ```
 
 ## 💬 Confirmation Flow Example

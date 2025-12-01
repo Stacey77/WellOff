@@ -9,6 +9,7 @@
  * - AI Voice Agent for voice interactions
  * - Nano Banana Pro for efficient AI inference
  * - NestJS-style modular architecture
+ * - REST API and WebSocket real-time communication
  */
 
 import { WellOffPlatform } from './core/WellOffPlatform.js';
@@ -24,6 +25,8 @@ export { MultimodalRAG } from './rag/MultimodalRAG.js';
 export { VoiceAgent } from './voice/VoiceAgent.js';
 export { NanoBananaPro } from './nanobanana/NanoBananaPro.js';
 export { NestIntegration, Module, Controller, Guard, Interceptor, Middleware } from './nest/NestIntegration.js';
+export { APIServer } from './api/APIServer.js';
+export { WebSocketServer } from './api/WebSocketServer.js';
 
 /**
  * Quick start function to create and initialize the platform
