@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Environment variables (never commit secrets!)
+.env
+server/.env
+*.local
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+
+# Build output
+dist/
+build/
