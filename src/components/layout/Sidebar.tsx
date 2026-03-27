@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  Server,
 } from 'lucide-react'
 
 const navItems = [
@@ -45,6 +46,12 @@ const navItems = [
     icon: Wand2,
     label: 'Media Studio',
     color: '#f59e0b',
+  },
+  {
+    href: '/mcp',
+    icon: Server,
+    label: 'MCP Hub',
+    color: '#00d4ff',
   },
 ]
 
