@@ -8,6 +8,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,16 +50,30 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
+  const url = `http://localhost:${PORT}`;
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('              WellOff AI Platform - Web GUI                     ');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
-  console.log(`🌐 Server running at http://localhost:${PORT}`);
+  console.log(`🌐 Server running at ${url}`);
   console.log('');
-  console.log('Open the URL above in your browser to access the GUI.');
+  console.log('Opening browser automatically...');
   console.log('');
   console.log('Press Ctrl+C to stop the server.');
   console.log('═══════════════════════════════════════════════════════════════');
+
+  // Auto-open the browser based on the OS
+  const openCmd =
+    process.platform === 'win32' ? `start ${url}` :
+    process.platform === 'darwin' ? `open ${url}` :
+    `xdg-open ${url}`;
+
+  exec(openCmd, (err) => {
+    if (err) {
+      console.log(`\n⚠️  Could not open browser automatically.`);
+      console.log(`   Please open ${url} in your browser manually.\n`);
+    }
+  });
 });
 
 export default server;
