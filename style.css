@@ -279,7 +279,18 @@ body {
 .top-controls {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 12px;
+}
+
+/* ─── Dashboard link button ────────────────────────────────────────────────── */
+
+.dash-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
 }
 
 /* ─── Icon button (theme toggle, chat close) ───────────────────────────────── */
