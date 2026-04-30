@@ -90,6 +90,10 @@ See `.env.example` for a template.
 
 ## Project structure
 
+This repository contains **two independent layers**:
+
+### 1 · PWA digital business card (repo root)
+
 ```
 rag7/
 ├── index.html          # Main PWA page
@@ -108,3 +112,15 @@ rag7/
         └── functions/
             └── chat.js # Serverless AI proxy (Netlify)
 ```
+
+### 2 · Advanced Python robotics / AGI package (`robot_agi/`)
+
+```
+robot_agi/
+├── advanced/           # Core Python library (14 capability sub-packages)
+├── config/             # Feature flags & hyperparameter defaults (YAML)
+└── tests/              # Full unittest suite – run with:
+                        #   python3 -m unittest discover -s robot_agi/tests -v
+```
+
+See [`robot_agi/README.md`](robot_agi/README.md) for a full breakdown of every sub-package.
