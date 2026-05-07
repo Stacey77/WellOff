@@ -694,6 +694,15 @@ export const SIMULATED_CALLS: Omit<ToolCall, 'id' | 'timestamp'>[] = [
     latencyMs: 203,
     status: 'success',
   },
+  {
+    serverId: 'welloff-kimi',
+    toolName: 'kimi_chat',
+    agentId: 'ARIA',
+    params: { model: 'kimi-k2', prompt: 'Draft a personalized outreach email for a distressed-property lead in zip 90028', temperature: 0.7 },
+    result: { reply: 'Subject: Your Sunset Blvd Property — Let\'s Talk\n\nHi [Owner], I noticed your property at...', tokensUsed: 312 },
+    latencyMs: 1380,
+    status: 'success',
+  },
 ]
 
 export function getTotalTools(): number {

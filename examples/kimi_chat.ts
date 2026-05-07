@@ -22,9 +22,20 @@
  *   KIMI_BASE_URL     – API base URL (default: https://api.moonshot.cn/v1)
  */
 
-import { kimiChat, createKimiProvider, KimiMessage } from '../src/lib/providers/kimi'
+import { kimiChat, createKimiProvider, smokeTest, KimiMessage } from '../src/lib/providers/kimi'
 
 async function main() {
+  // ── 0. Smoke-test — validates config without hitting the network ───────────
+  console.log('=== Smoke-test ===')
+  try {
+    const status = smokeTest()
+    console.log(`Config OK — model: ${status.model}, base: ${status.baseUrl}`)
+  } catch (err) {
+    console.error('Config error:', err instanceof Error ? err.message : err)
+    process.exit(1)
+  }
+  console.log()
+
   // ── 1. Basic one-shot chat ────────────────────────────────────────────────
   console.log('=== Basic kimiChat ===')
 

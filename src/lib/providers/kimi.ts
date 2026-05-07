@@ -170,3 +170,30 @@ export function createKimiProvider(config: KimiConfig = {}) {
       kimiChat(messages, { ...config, ...overrides }),
   }
 }
+
+/**
+ * Smoke-test the Kimi provider configuration without sending a real API
+ * request.  Validates that an API key is available and that the base URL is
+ * on the allowlist.  Throws with a descriptive message if anything is
+ * misconfigured.
+ *
+ * @example
+ * ```ts
+ * import { smokeTest } from '@/lib/providers/kimi'
+ * smokeTest() // throws if MOONSHOT_API_KEY is missing or baseUrl is invalid
+ * ```
+ */
+export function smokeTest(config: KimiConfig = {}): {
+  ok: true
+  model: string
+  baseUrl: string
+} {
+  const baseUrl = resolveBaseUrl(config.baseUrl)
+  validateBaseUrl(baseUrl)
+  resolveApiKey(config.apiKey) // throws if no key found
+  return {
+    ok: true,
+    model: resolveModel(config.model),
+    baseUrl,
+  }
+}
