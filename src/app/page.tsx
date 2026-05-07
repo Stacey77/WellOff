@@ -160,6 +160,8 @@ const activityTemplates = [
   (a: string) => `${a} updated movement score for 8 properties`,
   (a: string) => `${a} queued 12-message follow-up sequence`,
   (a: string) => `${a} generated virtual staging for listing`,
+  (a: string) => `${a} drafted outreach email via Kimi for distressed-property lead`,
+  (a: string) => `${a} summarized 128 K-token lease via Kimi (moonshot-v1-128k)`,
 ]
 
 export default function Dashboard() {
