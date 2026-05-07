@@ -599,6 +599,71 @@ export const MCP_SERVERS: MCPServer[] = [
       },
     ],
   },
+
+  // ── 6. Kimi (Moonshot AI) ─────────────────────────────────────────────────
+  {
+    id: 'welloff-kimi',
+    name: 'welloff-kimi',
+    description: 'Moonshot AI (Kimi) inference backend — OpenAI-compatible chat completions via kimi-k2 and moonshot-v1 models',
+    version: '1.0.0',
+    transport: 'http',
+    endpoint: 'https://api.moonshot.cn/v1',
+    color: '#06b6d4',
+    agentId: 'ARIA',
+    status: 'connected',
+    callsToday: 214,        // seeded display value — updated by live simulation in MCPDashboard
+    avgLatencyMs: 1340,     // seeded display value — p50 observed during initial testing
+    tools: [
+      {
+        name: 'kimi_chat',
+        description: 'Send a chat-completion request to the Kimi (Moonshot AI) API and return the assistant reply',
+        agentId: 'ARIA',
+        inputSchema: {
+          type: 'object',
+          required: ['messages'],
+          properties: {
+            messages: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Array of chat messages ({role, content})',
+            },
+            model: {
+              type: 'string',
+              enum: ['kimi-k2', 'moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'],
+              description: 'Model to use (default: kimi-k2)',
+            },
+            temperature: { type: 'number', minimum: 0, maximum: 2, description: 'Sampling temperature (default: 0.7)' },
+            maxTokens: { type: 'number', minimum: 1, description: 'Maximum tokens to generate' },
+          },
+        },
+      },
+      {
+        name: 'kimi_smoke_test',
+        description: 'Validate the Kimi provider configuration (API key, base URL) without making a live inference call',
+        agentId: 'ARIA',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            model: { type: 'string', description: 'Model ID to validate against (optional)' },
+          },
+        },
+      },
+    ],
+    resources: [
+      { uri: 'kimi://models', name: 'Kimi Models', description: 'Available Moonshot AI model identifiers', mimeType: 'application/json' },
+      { uri: 'kimi://docs', name: 'Kimi API Docs', description: 'OpenAI-compatible API reference for Moonshot AI', mimeType: 'text/html' },
+    ],
+    prompts: [
+      {
+        name: 'draft_outreach_email',
+        description: 'Draft a personalized outreach email for a real estate lead using the Kimi language model',
+        arguments: [
+          { name: 'leadId', description: 'Lead to write for', required: true },
+          { name: 'tone', description: 'Email tone: professional, friendly, or urgent', required: false },
+        ],
+      },
+    ],
+  },
 ]
 
 // ─── Simulated Tool Call Templates ───────────────────────────────────────────
