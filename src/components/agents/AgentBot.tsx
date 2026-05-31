@@ -31,6 +31,8 @@ export const AGENTS: Agent[] = [
       'Queuing outreach sequence for 8 new leads',
       'Cross-referencing MLS data with social signals',
       'Identifying motivated sellers in watchlist',
+      'Drafting outreach email via Kimi for distressed-property lead',
+      'Generating personalized listing summary with Kimi (128 K context)',
     ],
   },
   {
@@ -136,6 +138,7 @@ export const AGENTS: Agent[] = [
       'Coordinating territory expansion analysis',
       'Synthesizing market intelligence report',
       'Dispatching bulk SMS sequence to 47 contacts',
+      'Invoking Kimi (kimi-k2) for long-context deal analysis',
     ],
   },
 ]
