@@ -1,10 +1,10 @@
-"""Stdlib-only HTTP server exposing the Super Brain as an HTML dashboard."""
+"""Stdlib-only HTTP server exposing Ingenium as an HTML dashboard."""
 import json
 import logging
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from ..core.brain import SuperBrain
+from ..core.brain import Ingenium
 
 logger = logging.getLogger(__name__)
 
@@ -17,13 +17,13 @@ CONTENT_TYPES = {
 }
 
 
-def build_demo_brain() -> SuperBrain:
-    """Construct a SuperBrain pre-populated with a sample company edge.
+def build_demo_brain() -> Ingenium:
+    """Construct an Ingenium pre-populated with a sample company edge.
 
     Returns:
-        A SuperBrain ready to execute objectives against out of the box.
+        An Ingenium instance ready to execute objectives against out of the box.
     """
-    brain = SuperBrain()
+    brain = Ingenium()
     ci = brain.company_intelligence
     ci.strategy.set_positioning("AI ops partner for local service businesses")
     ci.strategy.add_priority("book more jobs", rank=1)
@@ -34,17 +34,17 @@ def build_demo_brain() -> SuperBrain:
     return brain
 
 
-def make_handler(brain: SuperBrain) -> type:
-    """Bind a SuperBrain instance to a request handler class.
+def make_handler(brain: Ingenium) -> type:
+    """Bind an Ingenium instance to a request handler class.
 
     Args:
-        brain: The SuperBrain instance requests should read and act through.
+        brain: The Ingenium instance requests should read and act through.
 
     Returns:
         A BaseHTTPRequestHandler subclass wired to that instance.
     """
 
-    class SuperBrainHandler(BaseHTTPRequestHandler):
+    class IngeniumHandler(BaseHTTPRequestHandler):
         """Serves the dashboard page and a small JSON API around `brain`."""
 
         def _send_json(self, status: int, payload: dict) -> None:
@@ -95,16 +95,16 @@ def make_handler(brain: SuperBrain) -> type:
         def log_message(self, format: str, *args) -> None:
             logger.info("%s - %s", self.address_string(), format % args)
 
-    return SuperBrainHandler
+    return IngeniumHandler
 
 
-def make_server(host: str = "0.0.0.0", port: int = 8000, brain: SuperBrain | None = None) -> ThreadingHTTPServer:
-    """Build (but do not start) a Super Brain web GUI server.
+def make_server(host: str = "0.0.0.0", port: int = 8000, brain: Ingenium | None = None) -> ThreadingHTTPServer:
+    """Build (but do not start) an Ingenium web GUI server.
 
     Args:
         host: Interface to bind to.
         port: Port to listen on. Pass 0 to let the OS assign a free port.
-        brain: SuperBrain instance to serve; a pre-populated demo brain if omitted.
+        brain: Ingenium instance to serve; a pre-populated demo brain if omitted.
 
     Returns:
         A ThreadingHTTPServer ready to have `serve_forever()` called on it.
@@ -113,14 +113,14 @@ def make_server(host: str = "0.0.0.0", port: int = 8000, brain: SuperBrain | Non
 
 
 def run(host: str = "0.0.0.0", port: int = 8000) -> None:
-    """Start the Super Brain web GUI and block serving requests until interrupted.
+    """Start the Ingenium web GUI and block serving requests until interrupted.
 
     Args:
         host: Interface to bind to.
         port: Port to listen on.
     """
     server = make_server(host, port)
-    logger.info("Super Brain GUI listening on http://%s:%d", host, port)
+    logger.info("Ingenium GUI listening on http://%s:%d", host, port)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
