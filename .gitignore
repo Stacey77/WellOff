@@ -6,6 +6,10 @@ node_modules/
 server/.env
 *.local
 
+# Python cache
+__pycache__/
+*.pyc
+
 # OS artefacts
 .DS_Store
 Thumbs.db
