@@ -89,8 +89,12 @@ super_brain/
 ├── company_intelligence/    # strategy, customer_data, goals, knowledge, brand
 ├── agent/                   # research, create, outreach, follow_up, optimize
 ├── integrations/            # crm, web_builder, email, finance, analytics, calendar
+├── web/                      # stdlib-only HTTP server + HTML dashboard
+│   ├── server.py
+│   └── static/               # index.html, style.css, app.js
 └── tests/
-    └── test_brain.py
+    ├── test_brain.py
+    └── test_web.py
 ```
 
 ## Usage
@@ -121,6 +125,31 @@ From the repo root:
 python3 -m unittest discover -s super_brain/tests -v
 ```
 
+## HTML dashboard
+
+`super_brain/web/` is a stdlib-only HTTP server (no new dependencies) that
+serves an HTML dashboard for the brain:
+
+```bash
+python3 -m super_brain.web.server
+# -> open http://localhost:8000
+```
+
+The dashboard shows both hemispheres and the six integrations live, and lets
+you type an objective and run a full think → connect → execute cycle from the
+browser — the Company Intelligence cards, integration badges, and each Agent
+stage update in place with the resulting report. The underlying `SuperBrain`
+instance is held in memory by the server process, so state (CRM activity,
+sent emails, scheduled follow-ups, tracked analytics) accumulates across
+runs, the same way the brain would in real use.
+
+It exposes two JSON endpoints the dashboard's JS calls, which you can also
+hit directly:
+
+- `GET /api/edge` — the current company intelligence snapshot.
+- `POST /api/execute` with `{"objective": "..."}` — runs the full pipeline
+  and returns the same report shape as `SuperBrain.execute()`.
+
 ## Running in a container (Podman / Rancher Desktop / Docker)
 
 A `Containerfile` at the repo root packages `super_brain/` as a standalone
@@ -131,17 +160,24 @@ also runs the full test suite — the build fails if a test fails.
 # Podman (or Podman Desktop's embedded CLI, or Rancher Desktop set to the
 # Podman/moby backend):
 podman build -t super-brain -f Containerfile .
-podman run --rm super-brain
+podman run --rm -p 8000:8000 super-brain
+# -> open http://localhost:8000
 
 # Docker works identically:
 docker build -t super-brain -f Containerfile .
-docker run --rm super-brain
+docker run --rm -p 8000:8000 super-brain
 ```
 
-The default command runs `super_brain/demo.py`, which populates a sample
-company edge (strategy, one customer record, a goal, a knowledge entry,
-brand voice) and executes one full think → connect → execute cycle,
-printing the resulting report as JSON.
+The default command runs the HTML dashboard (`super_brain.web.server`) on
+port 8000. For the one-shot CLI report instead:
+
+```bash
+podman run --rm super-brain python3 -m super_brain.demo
+```
+
+That populates the same sample company edge (strategy, one customer record,
+a goal, a knowledge entry, brand voice) and executes one full
+think → connect → execute cycle, printing the resulting report as JSON.
 
 ## Extending with real integrations
 
