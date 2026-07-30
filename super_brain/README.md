@@ -121,6 +121,28 @@ From the repo root:
 python3 -m unittest discover -s super_brain/tests -v
 ```
 
+## Running in a container (Podman / Rancher Desktop / Docker)
+
+A `Containerfile` at the repo root packages `super_brain/` as a standalone
+image with no dependencies beyond the Python standard library. Building it
+also runs the full test suite — the build fails if a test fails.
+
+```bash
+# Podman (or Podman Desktop's embedded CLI, or Rancher Desktop set to the
+# Podman/moby backend):
+podman build -t super-brain -f Containerfile .
+podman run --rm super-brain
+
+# Docker works identically:
+docker build -t super-brain -f Containerfile .
+docker run --rm super-brain
+```
+
+The default command runs `super_brain/demo.py`, which populates a sample
+company edge (strategy, one customer record, a goal, a knowledge entry,
+brand voice) and executes one full think → connect → execute cycle,
+printing the resulting report as JSON.
+
 ## Extending with real integrations
 
 Every adapter in `integrations/` extends `Integration` (`integrations/base.py`),
