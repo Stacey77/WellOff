@@ -35,6 +35,7 @@ make health       # curl /api/v1/health (server must be running)
 | Webhooks | `src/webhooks/dispatcher.py` — retry-backed dispatch |
 | JWT auth | `src/auth/jwt_manager.py` |
 | API key store | `src/auth/key_store.py` — `KeyStore` |
+| Three-Way Empire (phases 1–8) | `src/empire/` — see `docs/EMPIRE.md` |
 | LLM provider | `src/llm/provider.py` — `LLMProvider`, `create_llm()` |
 
 ## Agents
@@ -52,7 +53,7 @@ CODING    SUMMARIZATION  IDE   CDE     KALLY  EXECUTION
 
 All registered via `app.include_router()` in `create_app()`. OpenAPI tags: `_OPENAPI_TAGS` in `main.py`. Prometheus metrics at `/metrics`.
 
-`health` `agents` `tasks` (SSE stream) `crew` `ide` `cde` `platform` `webhooks` `sessions` `eval` `auth` `system` `scheduler` `usage` `memory` — each in `src/api/endpoints/<name>.py`.
+`health` `agents` `tasks` (SSE stream) `crew` `ide` `cde` `platform` `empire` `webhooks` `sessions` `eval` `auth` `system` `scheduler` `usage` `memory` — each in `src/api/endpoints/<name>.py`.
 
 ## Auth
 

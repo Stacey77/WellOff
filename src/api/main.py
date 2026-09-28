@@ -27,6 +27,7 @@ from src.llm.provider import LLMProvider, create_llm
 from src.api.endpoints import agents, health, tasks
 from src.api.endpoints.cde import router as cde_router
 from src.api.endpoints.crew import router as crew_router
+from src.api.endpoints.empire import router as empire_router
 from src.api.endpoints.eval import router as eval_router
 from src.api.endpoints.ide import router as ide_router
 from src.api.endpoints.platform import router as platform_router
@@ -39,6 +40,7 @@ from src.cde.cde_agent import CDEAgent
 from src.execution.execution_agent import ExecutionAgent
 from src.execution.execution_engine import ExecutionEngine
 from src.ide.ide_agent import IDEAgent
+from src.empire.platform import EmpirePlatform
 from src.platform.developer_portal import DeveloperPortal
 from src.platform.tool_landscape import ToolLandscape
 from src.config import get_settings
@@ -122,6 +124,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Internal/External developer portal
     app.state.developer_portal = DeveloperPortal(load_defaults=True)
+    app.state.empire = EmpirePlatform(audit_path=os.environ.get("EMPIRE_AUDIT_PATH") or None)
 
     # Webhook dispatcher
     app.state.webhook_dispatcher = WebhookDispatcher()
@@ -314,6 +317,7 @@ _OPENAPI_TAGS = [
     {"name": "ide", "description": "AI-powered vibecoding IDE — completions, explanations, refactoring"},
     {"name": "cde", "description": "Cloud Development Environment lifecycle management"},
     {"name": "platform", "description": "Developer portal and tool landscape registry"},
+    {"name": "empire", "description": "Three-Way Empire — Foundry, Factory, Studio, onboarding, billing, audit"},
     {"name": "memory", "description": "Short-term, long-term, episodic and hybrid vector memory management"},
 ]
 
@@ -375,6 +379,7 @@ def create_app() -> FastAPI:
     app.include_router(ide_router)
     app.include_router(cde_router)
     app.include_router(platform_router)
+    app.include_router(empire_router)
     app.include_router(webhooks_router)
     app.include_router(sessions_router)
     app.include_router(eval_router)
