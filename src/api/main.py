@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import secrets
@@ -241,7 +242,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         len(factory.list_agents()),
         len(tool_registry),
     )
+    # Phase 9 — Empire autoscaler loop (opt-in: EMPIRE_SCALING_INTERVAL seconds)
+    scaling_stop = asyncio.Event()
+    scaling_interval = float(os.environ.get("EMPIRE_SCALING_INTERVAL") or 0)
+    scaling_task = (
+        asyncio.create_task(app.state.empire.scaling.run_loop(scaling_interval, scaling_stop))
+        if scaling_interval > 0 else None
+    )
+
     yield
+
+    scaling_stop.set()
+    if scaling_task is not None:
+        await scaling_task
 
     await task_scheduler.stop()
     await task_queue.stop()

@@ -257,3 +257,102 @@ def tenant_agent(body: AgentRequest, request: Request,
                  x_tenant_key: str | None = Header(default=None)) -> dict[str, Any]:
     tid = _tenant(request, x_tenant_key)
     return _p(request).run_agent(body.goal, tid)
+
+
+# ---------------- Phase 9: scaling ----------------
+class JobRequest(BaseModel):
+    tenant_id: str
+    goal: str = Field(min_length=1, max_length=2000)
+    priority: int = Field(5, ge=0, le=9)
+
+
+class TenantJobRequest(BaseModel):
+    goal: str = Field(min_length=1, max_length=2000)
+    priority: int = Field(5, ge=0, le=9)
+
+
+class PolicyRequest(BaseModel):
+    min_workers: int | None = Field(None, ge=0, le=256)
+    max_workers: int | None = Field(None, ge=0, le=256)
+    jobs_per_worker: int | None = Field(None, ge=1, le=1000)
+    idle_ttl_s: float | None = Field(None, ge=0)
+    worker_cpus: int | None = Field(None, ge=1, le=64)
+    pool: str | None = None
+    environment: str | None = None
+
+
+def _submit(request: Request, tenant_id: str, goal: str, priority: int) -> dict[str, Any]:
+    try:
+        job = _p(request).scaling.submit(tenant_id, goal, priority)
+    except KeyError as exc:
+        raise _404(exc) from exc
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return job.to_dict()
+
+
+@router.post("/scaling/jobs", status_code=202)
+def submit_job(body: JobRequest, request: Request) -> dict[str, Any]:
+    return _submit(request, body.tenant_id, body.goal, body.priority)
+
+
+@router.get("/scaling/jobs/{job_id}")
+def get_job(job_id: str, request: Request) -> dict[str, Any]:
+    try:
+        return _p(request).scaling.get_job(job_id).to_dict()
+    except KeyError as exc:
+        raise _404(exc) from exc
+
+
+@router.post("/scaling/tick")
+def scaling_tick(request: Request) -> dict[str, Any]:
+    return _p(request).scaling.tick()
+
+
+@router.get("/scaling/status")
+def scaling_status(request: Request) -> dict[str, Any]:
+    return _p(request).scaling.status()
+
+
+@router.put("/scaling/policy")
+def scaling_policy(body: PolicyRequest, request: Request) -> dict[str, Any]:
+    changes = body.model_dump(exclude_none=True)
+    p = _p(request)
+    if "pool" in changes and changes["pool"] not in p.factory.pools:
+        raise HTTPException(422, f"unknown pool {changes['pool']!r}")
+    try:
+        return p.scaling.set_policy(**changes).to_dict()
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@router.get("/scaling/attribution/{tenant_id}")
+def attribution(tenant_id: str, request: Request) -> dict[str, Any]:
+    try:
+        return _p(request).scaling.attribution(tenant_id)
+    except KeyError as exc:
+        raise _404(exc) from exc
+
+
+@router.post("/tenant/jobs", status_code=202)
+def tenant_submit(body: TenantJobRequest, request: Request,
+                  x_tenant_key: str | None = Header(default=None)) -> dict[str, Any]:
+    tid = _tenant(request, x_tenant_key)
+    return _submit(request, tid, body.goal, body.priority)
+
+
+@router.get("/tenant/jobs")
+def tenant_jobs(request: Request,
+                x_tenant_key: str | None = Header(default=None)) -> list[dict[str, Any]]:
+    tid = _tenant(request, x_tenant_key)
+    return [j.to_dict(include_result=False) for j in _p(request).scaling.jobs_for(tid)]
+
+
+@router.get("/tenant/jobs/{job_id}")
+def tenant_job(job_id: str, request: Request,
+               x_tenant_key: str | None = Header(default=None)) -> dict[str, Any]:
+    tid = _tenant(request, x_tenant_key)
+    job = _p(request).scaling.jobs.get(job_id)
+    if job is None or job.tenant_id != tid:  # never confirm other tenants' job ids
+        raise HTTPException(404, f"unknown job {job_id!r}")
+    return job.to_dict()

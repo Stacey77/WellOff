@@ -14,6 +14,7 @@ from src.empire.graph import LLM, PlanActCheckAgent
 from src.empire.infra import InfraRegistry
 from src.empire.metering import Metering
 from src.empire.onboarding import OnboardingFlow
+from src.empire.scaling import ScalingEngine
 from src.empire.studio import AgenticStudio
 
 
@@ -29,6 +30,7 @@ class EmpirePlatform:
         self.deployer = Deployer(self.foundry)
         self.onboarding = OnboardingFlow(self)
         self.llm = llm
+        self.scaling = ScalingEngine(self)
         self._tenant_keys: dict[str, str] = {}  # sha256(key) -> tenant_id
 
     # tenant API keys are stored hashed only
@@ -70,4 +72,7 @@ class EmpirePlatform:
             "tenants": [t.to_dict() for t in self.onboarding.tenants.values()],
             "audit": {"events": len(self.audit.events), "chain_ok": ok,
                       "first_bad_seq": bad},
+            "scaling": {"workers": len(self.scaling.active_workers()),
+                        "queued": self.scaling.queued(),
+                        "desired_workers": self.scaling.desired_workers()},
         }

@@ -4,6 +4,8 @@ Pricing mirrors the Nova Digitus sales package:
   strategy  $300 one-time session
   pilot     $1,500 one-time (range $500–2,500)
   retainer  $2,000 / month (range $1,000–3,000) with included usage
+Phase 9 adds ``cpu_second`` (scaled-worker compute): pilot includes 10 CPU-hours,
+retainer 100 CPU-hours/month; overage $1.80 / $1.08 per CPU-hour.
 """
 
 from __future__ import annotations
@@ -29,13 +31,13 @@ PLANS: dict[Tier, Plan] = {
     Tier.STRATEGY: Plan(Tier.STRATEGY, 300.0, False, {}, {}),
     Tier.PILOT: Plan(
         Tier.PILOT, 1500.0, False,
-        {"agent_run": 500, "mcp_call": 2000, "deployment": 2},
-        {"agent_run": 0.05, "mcp_call": 0.01, "deployment": 50.0},
+        {"agent_run": 500, "mcp_call": 2000, "deployment": 2, "cpu_second": 36_000},
+        {"agent_run": 0.05, "mcp_call": 0.01, "deployment": 50.0, "cpu_second": 0.0005},
     ),
     Tier.RETAINER: Plan(
         Tier.RETAINER, 2000.0, True,
-        {"agent_run": 5000, "mcp_call": 20000, "deployment": 10},
-        {"agent_run": 0.03, "mcp_call": 0.005, "deployment": 40.0},
+        {"agent_run": 5000, "mcp_call": 20000, "deployment": 10, "cpu_second": 360_000},
+        {"agent_run": 0.03, "mcp_call": 0.005, "deployment": 40.0, "cpu_second": 0.0003},
     ),
 }
 

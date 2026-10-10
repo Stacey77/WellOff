@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — Three-Way Empire phase 9
+
+- Added `src/empire/scaling.py`: multi-tenant job queues with weighted fair share, elastic worker pool backed by AI Factory deployments (scale-to-zero, idle reaping, capacity-aware), `cpu_second` metering and per-tenant/worker/pool cost attribution, opt-in background loop (`EMPIRE_SCALING_INTERVAL`).
+- Added 9 `/api/v1/empire/scaling/*` and `/tenant/jobs*` routes and 13 tests.
+
 ## [Unreleased] — Three-Way Empire phases 1–8
 
 - Added `src/empire`: pillars, per-client auth modes, OSS infra, MCP server (9 tools), plan→act→check graph, client onboarding state machine, metering/pricing/invoices, hash-chained audit log, per-tenant podman-compose + Gitea CI bundles.

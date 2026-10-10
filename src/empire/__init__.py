@@ -9,6 +9,7 @@ Phases:
   6  REST API (/api/v1/empire)
   7  Metering, pricing tiers, invoice drafts, tamper-evident audit log
   8  Per-tenant deploy packaging (podman-compose) + Gitea Actions CI
+  9  Agentic scaling: fair-share multi-tenant jobs, elastic workers, cost attribution
 """
 
 from src.empire.platform import EmpirePlatform

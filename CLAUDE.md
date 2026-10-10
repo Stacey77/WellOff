@@ -35,7 +35,7 @@ make health       # curl /api/v1/health (server must be running)
 | Webhooks | `src/webhooks/dispatcher.py` — retry-backed dispatch |
 | JWT auth | `src/auth/jwt_manager.py` |
 | API key store | `src/auth/key_store.py` — `KeyStore` |
-| Three-Way Empire (phases 1–8) | `src/empire/` — see `docs/EMPIRE.md` |
+| Three-Way Empire (phases 1–9) | `src/empire/` — see `docs/EMPIRE.md` |
 | LLM provider | `src/llm/provider.py` — `LLMProvider`, `create_llm()` |
 
 ## Agents
