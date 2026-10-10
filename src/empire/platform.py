@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,7 @@ from src.empire.audit import AuditLog
 from src.empire.deploy import Deployer
 from src.empire.factory import AIFactory
 from src.empire.foundry import AIFoundry
-from src.empire.graph import LLM, PlanActCheckAgent
+from src.empire.graph import LLM, FallbackLLM, OllamaLLM, PlanActCheckAgent
 from src.empire.infra import InfraRegistry
 from src.empire.metering import Metering
 from src.empire.onboarding import OnboardingFlow
@@ -20,7 +21,8 @@ from src.empire.studio import AgenticStudio
 
 class EmpirePlatform:
     def __init__(self, audit_path: str | Path | None = None,
-                 llm: LLM | None = None) -> None:
+                 llm: LLM | None = None,
+                 state_path: str | Path | None = None) -> None:
         self.infra = InfraRegistry()
         self.foundry = AIFoundry()
         self.factory = AIFactory(self.infra)
@@ -32,6 +34,43 @@ class EmpirePlatform:
         self.llm = llm
         self.scaling = ScalingEngine(self)
         self._tenant_keys: dict[str, str] = {}  # sha256(key) -> tenant_id
+        self.state_path = Path(state_path) if state_path else None
+        self.restored = False
+        if self.state_path:
+            from src.empire import state
+
+            self.restored = state.load(self, self.state_path)
+
+    @classmethod
+    def from_env(cls) -> EmpirePlatform:
+        """Build the platform from deployment environment variables.
+
+        EMPIRE_STATE_PATH   JSON state file (survives restarts)
+        EMPIRE_AUDIT_PATH   audit log file
+        EMPIRE_LLM          "ollama" or "rule" (default rule = offline planner)
+        OLLAMA_URL          default http://localhost:11434
+        EMPIRE_MODEL        default llama3.1:8b
+        """
+        llm: LLM | None = None
+        if os.environ.get("EMPIRE_LLM", "rule").lower() == "ollama":
+            llm = FallbackLLM(OllamaLLM(
+                os.environ.get("EMPIRE_MODEL", "llama3.1:8b"),
+                os.environ.get("OLLAMA_URL", "http://localhost:11434")))
+        return cls(audit_path=os.environ.get("EMPIRE_AUDIT_PATH") or None, llm=llm,
+                   state_path=os.environ.get("EMPIRE_STATE_PATH") or None)
+
+    def persist(self) -> None:
+        if self.state_path:
+            from src.empire import state
+
+            state.save(self, self.state_path)
+
+    def llm_status(self) -> dict[str, Any]:
+        if isinstance(self.llm, FallbackLLM) and isinstance(self.llm.primary, OllamaLLM):
+            o = self.llm.primary
+            return {"provider": "ollama", "model": o.model, "url": o.base_url,
+                    "model_ready": o.available(), "last_source": self.llm.last_source}
+        return {"provider": "rule", "model": None, "model_ready": True}
 
     # tenant API keys are stored hashed only
     def register_tenant_key(self, tenant_id: str, key: str) -> None:

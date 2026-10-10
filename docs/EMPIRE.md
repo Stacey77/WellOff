@@ -46,4 +46,12 @@ is set; otherwise drive it with `POST /api/v1/empire/scaling/tick`. Default poli
 Compute pricing: pilot includes 10 CPU-hours, retainer 100 CPU-hours/month;
 overage $1.80 / $1.08 per CPU-hour (minimum 1 CPU-second per job).
 
-28 routes under `/api/v1/empire`. Tests: `pytest tests/unit/empire` (40).
+## Deployment
+
+`deploy/empire/` is a working deployment: Containerfile, compose stack (API + Ollama),
+`deploy.ps1` / `deploy.sh` one-command installers, `smoke_test.py`, `k8s.yaml`.
+The standalone service is `src/empire/server.py` (operator key `EMPIRE_ADMIN_KEY`,
+`/health`, `/ready`). State persists to `EMPIRE_STATE_PATH` via `src/empire/state.py`.
+See `deploy/empire/README.md`.
+
+28 routes under `/api/v1/empire`. Tests: `pytest tests/unit/empire` (46).

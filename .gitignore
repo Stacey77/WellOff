@@ -51,3 +51,6 @@ data/
 Thumbs.db
 push-me.patch
 agi-llm-integration.patch
+
+# Empire deploy secrets
+deploy/empire/.env

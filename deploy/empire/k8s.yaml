@@ -1,0 +1,87 @@
+# Three-Way Empire on Kubernetes (Rancher Desktop / any cluster) — the "prod" target.
+#   podman build -f deploy/empire/Containerfile -t nova-empire:latest .
+#   kubectl create namespace nova-empire
+#   kubectl -n nova-empire create secret generic empire-admin --from-literal=key=<operator key>
+#   kubectl -n nova-empire apply -f deploy/empire/k8s.yaml
+# Single replica on purpose: state lives in one JSON file on the PVC.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: empire-data}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 1Gi}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: ollama-models}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 20Gi}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: ollama}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: ollama}}
+  template:
+    metadata: {labels: {app: ollama}}
+    spec:
+      containers:
+        - name: ollama
+          image: docker.io/ollama/ollama:latest
+          ports: [{containerPort: 11434}]
+          volumeMounts: [{name: models, mountPath: /root/.ollama}]
+          lifecycle:
+            postStart:
+              exec: {command: ["/bin/sh", "-c", "(sleep 5; ollama pull llama3.1:8b) >/tmp/pull.log 2>&1 &"]}
+      volumes:
+        - name: models
+          persistentVolumeClaim: {claimName: ollama-models}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: ollama}
+spec:
+  selector: {app: ollama}
+  ports: [{port: 11434, targetPort: 11434}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: empire}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: empire}}
+  template:
+    metadata: {labels: {app: empire}}
+    spec:
+      securityContext: {runAsUser: 10001, fsGroup: 10001}
+      containers:
+        - name: empire
+          image: localhost/nova-empire:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 8080}]
+          env:
+            - {name: EMPIRE_ADMIN_KEY, valueFrom: {secretKeyRef: {name: empire-admin, key: key}}}
+            - {name: EMPIRE_LLM, value: ollama}
+            - {name: EMPIRE_MODEL, value: "llama3.1:8b"}
+            - {name: OLLAMA_URL, value: "http://ollama:11434"}
+            - {name: EMPIRE_SCALING_INTERVAL, value: "2"}
+          volumeMounts: [{name: data, mountPath: /data}]
+          readinessProbe: {httpGet: {path: /ready, port: 8080}, periodSeconds: 10}
+          livenessProbe: {httpGet: {path: /health, port: 8080}, periodSeconds: 20}
+          resources:
+            requests: {cpu: 250m, memory: 256Mi}
+            limits: {cpu: "1", memory: 512Mi}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: empire-data}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: empire}
+spec:
+  type: NodePort
+  selector: {app: empire}
+  ports: [{port: 8080, targetPort: 8080, nodePort: 30080}]

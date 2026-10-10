@@ -1,0 +1,27 @@
+# Three-Way Empire service image. Build context is the repo root:
+#   podman build -f deploy/empire/Containerfile -t nova-empire:latest .
+FROM docker.io/library/python:3.11-slim
+
+ENV PYTHONPATH=/app PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
+    EMPIRE_STATE_PATH=/data/state.json EMPIRE_AUDIT_PATH=/data/audit.jsonl
+
+WORKDIR /app
+COPY deploy/empire/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Only the packages the service imports
+COPY src/__init__.py /app/src/__init__.py
+COPY src/api/__init__.py /app/src/api/__init__.py
+COPY src/api/endpoints/__init__.py src/api/endpoints/empire.py /app/src/api/endpoints/
+COPY src/empire/ /app/src/empire/
+COPY deploy/empire/smoke_test.py /app/smoke_test.py
+
+RUN useradd --uid 10001 --create-home empire && mkdir -p /data && chown empire /data
+USER empire
+VOLUME ["/data"]
+EXPOSE 8080
+
+HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \
+  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health',timeout=4).status==200 else 1)"
+
+CMD ["uvicorn", "src.empire.server:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers"]

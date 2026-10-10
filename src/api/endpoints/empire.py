@@ -7,9 +7,10 @@ during onboarding auth bootstrap; stored hashed).
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from src.empire.auth_mode import AuthError, AuthMode, ProviderAuth
@@ -18,7 +19,18 @@ from src.empire.mcp_server import TOOL_NAMES
 from src.empire.onboarding import OnboardingError, Proposal, Tier
 from src.empire.platform import EmpirePlatform
 
-router = APIRouter(prefix="/api/v1/empire", tags=["empire"])
+
+def _autosave(request: Request) -> Iterator[None]:
+    """Persist platform state after every write (when EMPIRE_STATE_PATH is set)."""
+    yield
+    if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+        p = getattr(request.app.state, "empire", None)
+        if p is not None:
+            p.persist()
+
+
+router = APIRouter(prefix="/api/v1/empire", tags=["empire"],
+                   dependencies=[Depends(_autosave)])
 
 
 def _p(request: Request) -> EmpirePlatform:

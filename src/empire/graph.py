@@ -51,6 +51,13 @@ class OllamaLLM:
         self.base_url = base_url.rstrip("/")
 
     def complete(self, prompt: str) -> str:
+        if prompt.startswith("PLAN:"):
+            prompt = (
+                "Break this goal into 1-6 short, concrete steps. Reply with ONLY a "
+                "JSON array of strings, no prose.\nGoal: " + prompt[5:].strip()
+            )
+        elif prompt.startswith("ACT:"):
+            prompt = "Carry out this step and reply briefly:\n" + prompt[4:].strip()
         r = httpx.post(
             f"{self.base_url}/api/generate",
             json={"model": self.model, "prompt": prompt, "stream": False},
@@ -58,6 +65,37 @@ class OllamaLLM:
         )
         r.raise_for_status()
         return str(r.json().get("response", ""))
+
+    def available(self) -> bool:
+        try:
+            r = httpx.get(f"{self.base_url}/api/tags", timeout=3)
+            r.raise_for_status()
+            names = {m.get("name", "") for m in r.json().get("models", [])}
+            return any(n == self.model or n.split(":")[0] == self.model for n in names)
+        except (httpx.HTTPError, ValueError):
+            return False
+
+
+class FallbackLLM:
+    """Use the primary model; if it errors, answer with the offline planner.
+
+    Keeps the platform working while Ollama is starting or a model is still
+    downloading. ``last_source`` says which one answered.
+    """
+
+    def __init__(self, primary: LLM, fallback: LLM | None = None) -> None:
+        self.primary = primary
+        self.fallback = fallback or RuleLLM()
+        self.last_source = "primary"
+
+    def complete(self, prompt: str) -> str:
+        try:
+            out = self.primary.complete(prompt)
+            self.last_source = "primary"
+            return out
+        except Exception:  # noqa: BLE001 - any model failure falls back
+            self.last_source = "fallback"
+            return self.fallback.complete(prompt)
 
 
 class _MiniGraph:

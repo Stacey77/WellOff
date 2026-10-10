@@ -125,7 +125,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Internal/External developer portal
     app.state.developer_portal = DeveloperPortal(load_defaults=True)
-    app.state.empire = EmpirePlatform(audit_path=os.environ.get("EMPIRE_AUDIT_PATH") or None)
+    app.state.empire = EmpirePlatform.from_env()
 
     # Webhook dispatcher
     app.state.webhook_dispatcher = WebhookDispatcher()
