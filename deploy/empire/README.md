@@ -45,6 +45,7 @@ See the header of `k8s.yaml`. It runs one replica with persistent volumes for st
 
 | What | How |
 |---|---|
+| Operator console | http://localhost:8080/ (paste the operator key once) |
 | API docs | http://localhost:8080/docs |
 | Health / readiness | `/health`, `/ready` (shows model status, restored state, audit chain) |
 | Operator calls | header `X-API-Key: <EMPIRE_ADMIN_KEY>` |

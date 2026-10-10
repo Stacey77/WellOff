@@ -92,3 +92,17 @@ def test_from_env(monkeypatch, tmp_path):
     st = p.llm_status()
     assert st["provider"] == "ollama" and st["model_ready"] is False
     assert p.run_agent("pools")["done"]  # falls back while Ollama is unreachable
+
+
+def test_console_page_and_feed(tmp_path):
+    c, _ = _client(tmp_path)
+    page = c.get("/")
+    assert page.status_code == 200 and "Empire Console" in page.text
+    assert page.text.startswith("<!doctype html>")
+    assert c.get("/api/v1/empire/console").status_code == 401
+    c.post("/api/v1/empire/onboarding", headers=ADMIN, json={
+        "client_name": "Acme", "contact_email": "a@b.co", "run_to_live": True})
+    d = c.get("/api/v1/empire/console", headers=ADMIN).json()
+    assert d["kpis"]["live"] == 1 and d["kpis"]["draft_revenue"] == 1500.0
+    assert d["tenants"][0]["stage"] == "live" and d["events"][0]["seq"] > 0
+    assert {"workers", "policy", "jobs", "llm", "blueprints"} <= set(d)

@@ -6,6 +6,7 @@ client box needs nothing but this container and Ollama.
     uvicorn src.empire.server:app --host 0.0.0.0 --port 8080
 
 Access control
+  /, /console                      operator console (asks for the operator key)
   /health, /ready, /docs           public
   /api/v1/empire/tenant/*          client key   (X-Tenant-Key)
   every other /api/v1/empire/*     operator key (X-API-Key = EMPIRE_ADMIN_KEY)
@@ -21,15 +22,17 @@ import logging
 import os
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from src.api.endpoints.empire import router
 from src.empire.platform import EmpirePlatform
 
 log = logging.getLogger("empire")
+CONSOLE_FILE = Path(__file__).parent / "console" / "index.html"
 API_PREFIX = "/api/v1/empire"
 TENANT_PREFIX = f"{API_PREFIX}/tenant/"
 VERSION = "1.0.0"
@@ -95,6 +98,12 @@ def create_app(platform: EmpirePlatform | None = None,
             "llm": p.llm_status(),
             "operator_auth": bool(admin_key),
         }
+
+    @app.get("/", include_in_schema=False)
+    @app.get("/console", include_in_schema=False)
+    def console_page() -> HTMLResponse:
+        html = CONSOLE_FILE.read_text(encoding="utf-8")
+        return HTMLResponse('<!doctype html><html lang="en"><meta charset="utf-8">' + html)
 
     app.include_router(router)
     return app

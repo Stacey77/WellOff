@@ -368,3 +368,71 @@ def tenant_job(job_id: str, request: Request,
     if job is None or job.tenant_id != tid:  # never confirm other tenants' job ids
         raise HTTPException(404, f"unknown job {job_id!r}")
     return job.to_dict()
+
+
+# ---------------- Operator console feed ----------------
+_llm_cache: dict[str, Any] = {"at": 0.0, "value": None}
+
+
+def _llm_status_cached(p: EmpirePlatform) -> dict[str, Any]:
+    import time
+
+    now = time.monotonic()
+    if _llm_cache["value"] is None or now - _llm_cache["at"] > 10:
+        _llm_cache.update(at=now, value=p.llm_status())
+    return _llm_cache["value"]
+
+
+@router.get("/console")
+def console(request: Request) -> dict[str, Any]:
+    """Everything the operator console needs in one poll."""
+    p = _p(request)
+    s = p.scaling
+    ok, bad = p.audit.verify()
+    tenants = []
+    draft_total = 0.0
+    for t in p.onboarding.tenants.values():
+        inv = p.metering.invoice(t.id) if t.id in p.metering.accounts else None
+        jobs = s.jobs_for(t.id)
+        if inv:
+            draft_total += inv["total_usd"]
+        tenants.append({
+            "id": t.id, "client_name": t.proposal.client_name, "slug": t.slug,
+            "tier": t.proposal.tier.value, "stage": t.stage.value,
+            "auth_mode": t.proposal.auth_mode.value, "blueprint": t.proposal.blueprint,
+            "last_error": t.last_error, "api_key_hint": t.api_key_hint,
+            "queued": s.queued(t.id), "jobs": len(jobs),
+            "succeeded": sum(j.status.value == "succeeded" for j in jobs),
+            "cpu_seconds": sum(j.billed_cpu_seconds for j in jobs),
+            "invoice_total": inv["total_usd"] if inv else 0.0,
+            "history": t.history,
+        })
+    pools = [x.to_dict() for x in p.factory.pools.values()]
+    jobs = sorted(s.jobs.values(), key=lambda j: j.seq, reverse=True)[:40]
+    return {
+        "kpis": {
+            "clients": len(tenants),
+            "live": sum(t["stage"] == "live" for t in tenants),
+            "queued": s.queued(),
+            "workers": len(s.active_workers()),
+            "desired_workers": s.desired_workers(),
+            "free_cpus": sum(x["free_cpus"] for x in pools),
+            "total_cpus": sum(x["cpus"] for x in pools),
+            "draft_revenue": round(draft_total, 2),
+            "jobs_done": sum(j.status.value in ("succeeded", "failed") for j in s.jobs.values()),
+            "audit_ok": ok, "audit_events": len(p.audit.events), "audit_first_bad": bad,
+        },
+        "tenants": tenants,
+        "workers": [w.to_dict() for w in s.active_workers()],
+        "policy": s.policy.to_dict(),
+        "pools": pools,
+        "jobs": [{**j.to_dict(include_result=False),
+                  "client": p.onboarding.tenants[j.tenant_id].proposal.client_name
+                  if j.tenant_id in p.onboarding.tenants else j.tenant_id}
+                 for j in jobs],
+        "events": [{"seq": e.seq, "at": e.at, "action": e.action,
+                    "tenant_id": e.tenant_id, "hash": e.hash[:10]}
+                   for e in p.audit.events[-40:]][::-1],
+        "llm": _llm_status_cached(p),
+        "blueprints": [b["key"] for b in p.foundry.list_blueprints()],
+    }

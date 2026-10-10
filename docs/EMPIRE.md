@@ -52,6 +52,8 @@ overage $1.80 / $1.08 per CPU-hour (minimum 1 CPU-second per job).
 `deploy.ps1` / `deploy.sh` one-command installers, `smoke_test.py`, `k8s.yaml`.
 The standalone service is `src/empire/server.py` (operator key `EMPIRE_ADMIN_KEY`,
 `/health`, `/ready`). State persists to `EMPIRE_STATE_PATH` via `src/empire/state.py`.
-See `deploy/empire/README.md`.
+The operator console is served at `/` (`src/empire/console/index.html`): command bar,
+live client pipeline, scaling floor, agent trace, activity feed, client drawer. It polls
+`GET /api/v1/empire/console`. See `deploy/empire/README.md`.
 
-28 routes under `/api/v1/empire`. Tests: `pytest tests/unit/empire` (46).
+28 routes under `/api/v1/empire`. Tests: `pytest tests/unit/empire` (47).
