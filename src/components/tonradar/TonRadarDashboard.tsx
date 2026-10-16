@@ -23,6 +23,9 @@ const agentForRole: Record<UserRole, string> = {
   'mech-eng': 'VOLT',
   automotive: 'MOTOR',
   networking: 'MESH',
+  iaas: 'INFRA',
+  paas: 'PLAT',
+  xaas: 'XAAS',
 }
 
 interface TonRadarDashboardProps {

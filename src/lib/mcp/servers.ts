@@ -1234,7 +1234,386 @@ export const MCP_SERVERS: MCPServer[] = [
     ],
   },
 
-  // ── 12. Kimi (Moonshot AI) ────────────────────────────────────────────────
+  // ── 12. INFRA — IaaS AI ───────────────────────────────────────────────────
+  {
+    id: 'welloff-infra',
+    name: 'welloff-infra',
+    description: 'Cloud infrastructure provisioning — VM/container lifecycle, storage, networking, cost optimization, and disaster recovery',
+    version: '1.0.0',
+    transport: 'http',
+    endpoint: 'https://mcp.welloff.ai/infra/http',
+    color: '#0ea5e9',
+    agentId: 'INFRA',
+    status: 'connected',
+    callsToday: 1240,
+    avgLatencyMs: 380,
+    tools: [
+      {
+        name: 'provision_compute',
+        description: 'Provision VMs or container nodes',
+        agentId: 'INFRA',
+        inputSchema: {
+          type: 'object',
+          required: ['provider', 'region', 'instance_type', 'count', 'os'],
+          properties: {
+            provider: { type: 'string', enum: ['aws', 'azure', 'gcp'], description: 'Cloud provider' },
+            region: { type: 'string', description: 'Region to provision in (e.g., us-east-1)' },
+            instance_type: { type: 'string', description: 'Instance or node type (e.g., t3.large)' },
+            count: { type: 'number', minimum: 1, description: 'Number of instances to provision' },
+            os: { type: 'string', description: 'Operating system image (e.g., ubuntu-22.04)' },
+          },
+        },
+      },
+      {
+        name: 'manage_storage',
+        description: 'Manage cloud storage volumes',
+        agentId: 'INFRA',
+        inputSchema: {
+          type: 'object',
+          required: ['action', 'type', 'size_gb', 'name'],
+          properties: {
+            action: { type: 'string', enum: ['create', 'resize', 'delete'], description: 'Storage action' },
+            type: { type: 'string', enum: ['block', 'object', 'file'], description: 'Storage type' },
+            size_gb: { type: 'number', minimum: 1, description: 'Storage size in GB' },
+            name: { type: 'string', description: 'Storage resource name' },
+          },
+        },
+      },
+      {
+        name: 'configure_networking',
+        description: 'Configure cloud networking resources',
+        agentId: 'INFRA',
+        inputSchema: {
+          type: 'object',
+          required: ['resource_type', 'action', 'params'],
+          properties: {
+            resource_type: { type: 'string', enum: ['vpc', 'subnet', 'sg', 'lb'], description: 'Networking resource type' },
+            action: { type: 'string', description: 'Action to perform (e.g., create, update, delete)' },
+            params: { type: 'string', description: 'Resource parameters as JSON string' },
+          },
+        },
+      },
+      {
+        name: 'auto_scale_resource',
+        description: 'Set or trigger auto-scaling',
+        agentId: 'INFRA',
+        inputSchema: {
+          type: 'object',
+          required: ['resource_id', 'min_instances', 'max_instances', 'metric', 'threshold'],
+          properties: {
+            resource_id: { type: 'string', description: 'Resource or auto-scaling group ID' },
+            min_instances: { type: 'number', minimum: 0, description: 'Minimum instance count' },
+            max_instances: { type: 'number', minimum: 1, description: 'Maximum instance count' },
+            metric: { type: 'string', description: 'Scaling metric (e.g., cpu_utilization, request_count)' },
+            threshold: { type: 'number', description: 'Threshold value to trigger scaling' },
+          },
+        },
+      },
+      {
+        name: 'optimize_costs',
+        description: 'Run cost optimization analysis',
+        agentId: 'INFRA',
+        inputSchema: {
+          type: 'object',
+          required: ['provider', 'account_id', 'analysis_type'],
+          properties: {
+            provider: { type: 'string', enum: ['aws', 'azure', 'gcp'], description: 'Cloud provider' },
+            account_id: { type: 'string', description: 'Cloud account or subscription ID' },
+            analysis_type: { type: 'string', enum: ['rightsizing', 'reserved', 'spot'], description: 'Type of cost optimization analysis' },
+          },
+        },
+      },
+      {
+        name: 'monitor_infrastructure',
+        description: 'Get infrastructure metrics',
+        agentId: 'INFRA',
+        inputSchema: {
+          type: 'object',
+          required: ['resource_ids', 'metrics', 'period'],
+          properties: {
+            resource_ids: { type: 'array', items: { type: 'string' }, description: 'List of resource IDs to monitor' },
+            metrics: { type: 'array', items: { type: 'string' }, description: 'Metrics to retrieve (e.g., cpu, memory, disk_io)' },
+            period: { type: 'string', description: 'Time period (e.g., 1h, 24h, 7d)' },
+          },
+        },
+      },
+    ],
+    resources: [
+      { uri: 'infra://inventory', name: 'Cloud Inventory', description: 'All cloud resources across providers', mimeType: 'application/json' },
+      { uri: 'infra://costs', name: 'Cost Dashboard', description: 'Cost and usage dashboard across accounts', mimeType: 'application/json' },
+      { uri: 'infra://alerts', name: 'Infrastructure Alerts', description: 'Active infrastructure alerts and incidents', mimeType: 'application/json' },
+    ],
+    prompts: [
+      {
+        name: 'infra_migration_plan',
+        description: 'Generate a cloud migration plan from a source environment to a target provider',
+        arguments: [
+          { name: 'source', description: 'Source environment description', required: true },
+          { name: 'target_provider', description: 'Target cloud provider: aws, azure, or gcp', required: true },
+        ],
+      },
+      {
+        name: 'cost_reduction_report',
+        description: 'Generate a cost reduction report with actionable recommendations',
+        arguments: [
+          { name: 'budget', description: 'Monthly budget target in USD', required: true },
+          { name: 'period', description: 'Analysis period (e.g., last_30d, last_quarter)', required: true },
+        ],
+      },
+    ],
+  },
+
+  // ── 13. PLAT — PaaS AI ────────────────────────────────────────────────────
+  {
+    id: 'welloff-plat',
+    name: 'welloff-plat',
+    description: 'Platform lifecycle management — CI/CD orchestration, managed database provisioning, Kubernetes, and runtime management',
+    version: '1.0.0',
+    transport: 'http',
+    endpoint: 'https://mcp.welloff.ai/plat/http',
+    color: '#7c3aed',
+    agentId: 'PLAT',
+    status: 'connected',
+    callsToday: 892,
+    avgLatencyMs: 290,
+    tools: [
+      {
+        name: 'deploy_application',
+        description: 'Deploy application to platform',
+        agentId: 'PLAT',
+        inputSchema: {
+          type: 'object',
+          required: ['app_name', 'image', 'strategy', 'env'],
+          properties: {
+            app_name: { type: 'string', description: 'Application name' },
+            image: { type: 'string', description: 'Container image reference (e.g., registry/app:v2.4.1)' },
+            strategy: { type: 'string', enum: ['rolling', 'blue-green', 'canary'], description: 'Deployment strategy' },
+            env: { type: 'string', description: 'Target environment (e.g., production, staging)' },
+          },
+        },
+      },
+      {
+        name: 'manage_pipeline',
+        description: 'Manage CI/CD pipeline',
+        agentId: 'PLAT',
+        inputSchema: {
+          type: 'object',
+          required: ['repo', 'branch', 'action'],
+          properties: {
+            repo: { type: 'string', description: 'Repository name or URL' },
+            branch: { type: 'string', description: 'Branch to act on' },
+            action: { type: 'string', enum: ['trigger', 'cancel', 'status'], description: 'Pipeline action' },
+          },
+        },
+      },
+      {
+        name: 'provision_database',
+        description: 'Provision managed database',
+        agentId: 'PLAT',
+        inputSchema: {
+          type: 'object',
+          required: ['engine', 'version', 'size', 'replicas'],
+          properties: {
+            engine: { type: 'string', enum: ['postgres', 'mysql', 'redis', 'mongo'], description: 'Database engine' },
+            version: { type: 'string', description: 'Engine version (e.g., 15, 8.0)' },
+            size: { type: 'string', description: 'Instance size (e.g., db.t3.medium)' },
+            replicas: { type: 'number', minimum: 0, description: 'Number of read replicas' },
+          },
+        },
+      },
+      {
+        name: 'scale_service',
+        description: 'Scale a deployed service',
+        agentId: 'PLAT',
+        inputSchema: {
+          type: 'object',
+          required: ['service_name', 'replicas', 'cpu_limit', 'memory_limit'],
+          properties: {
+            service_name: { type: 'string', description: 'Service name to scale' },
+            replicas: { type: 'number', minimum: 0, description: 'Desired replica count' },
+            cpu_limit: { type: 'string', description: 'CPU limit (e.g., 500m, 2)' },
+            memory_limit: { type: 'string', description: 'Memory limit (e.g., 512Mi, 2Gi)' },
+          },
+        },
+      },
+      {
+        name: 'manage_runtime',
+        description: 'Manage service runtime config',
+        agentId: 'PLAT',
+        inputSchema: {
+          type: 'object',
+          required: ['service_name', 'action'],
+          properties: {
+            service_name: { type: 'string', description: 'Service name' },
+            action: { type: 'string', enum: ['env_update', 'secret_rotate', 'restart'], description: 'Runtime management action' },
+          },
+        },
+      },
+      {
+        name: 'monitor_platform',
+        description: 'Get platform metrics and health status',
+        agentId: 'PLAT',
+        inputSchema: {
+          type: 'object',
+          required: ['service_names', 'metrics', 'window'],
+          properties: {
+            service_names: { type: 'array', items: { type: 'string' }, description: 'Services to monitor' },
+            metrics: { type: 'array', items: { type: 'string' }, description: 'Metrics to retrieve (e.g., cpu, memory, error_rate, p99_latency)' },
+            window: { type: 'string', description: 'Time window (e.g., 15m, 1h, 24h)' },
+          },
+        },
+      },
+    ],
+    resources: [
+      { uri: 'plat://services', name: 'Running Services', description: 'All running services with health and replica status', mimeType: 'application/json' },
+      { uri: 'plat://pipelines', name: 'CI/CD Pipelines', description: 'Pipeline status across all repositories', mimeType: 'application/json' },
+      { uri: 'plat://databases', name: 'Managed Databases', description: 'Managed database instances with connection info', mimeType: 'application/json' },
+    ],
+    prompts: [
+      {
+        name: 'deployment_runbook',
+        description: 'Generate a deployment runbook for an application version',
+        arguments: [
+          { name: 'app_name', description: 'Application to deploy', required: true },
+          { name: 'version', description: 'Version or image tag to deploy', required: true },
+        ],
+      },
+      {
+        name: 'incident_response_plan',
+        description: 'Generate an incident response plan for a service outage',
+        arguments: [
+          { name: 'service_name', description: 'Affected service name', required: true },
+          { name: 'severity', description: 'Incident severity: p0, p1, or p2', required: true },
+        ],
+      },
+    ],
+  },
+
+  // ── 14. XAAS — XaaS Orchestrator AI ──────────────────────────────────────
+  {
+    id: 'welloff-xaas',
+    name: 'welloff-xaas',
+    description: 'Everything-as-a-service orchestration — multi-tenant provisioning, billing/metering, SLA enforcement, API gateway management, and service catalog',
+    version: '1.0.0',
+    transport: 'http',
+    endpoint: 'https://mcp.welloff.ai/xaas/http',
+    color: '#f43f5e',
+    agentId: 'XAAS',
+    status: 'connected',
+    callsToday: 634,
+    avgLatencyMs: 210,
+    tools: [
+      {
+        name: 'provision_tenant',
+        description: 'Onboard new tenant with full stack',
+        agentId: 'XAAS',
+        inputSchema: {
+          type: 'object',
+          required: ['tenant_name', 'tier', 'services', 'region'],
+          properties: {
+            tenant_name: { type: 'string', description: 'Tenant organization name' },
+            tier: { type: 'string', enum: ['starter', 'pro', 'enterprise'], description: 'Service tier' },
+            services: { type: 'array', items: { type: 'string' }, description: 'List of services to provision' },
+            region: { type: 'string', description: 'Deployment region (e.g., us-east-1)' },
+          },
+        },
+      },
+      {
+        name: 'manage_billing',
+        description: 'Handle billing, metering, and invoice generation',
+        agentId: 'XAAS',
+        inputSchema: {
+          type: 'object',
+          required: ['action', 'tenant_id', 'period'],
+          properties: {
+            action: { type: 'string', enum: ['invoice', 'usage', 'alert'], description: 'Billing action' },
+            tenant_id: { type: 'string', description: 'Tenant ID' },
+            period: { type: 'string', description: 'Billing period (e.g., 2026-10, last_30d)' },
+          },
+        },
+      },
+      {
+        name: 'enforce_sla',
+        description: 'Check and enforce SLA compliance',
+        agentId: 'XAAS',
+        inputSchema: {
+          type: 'object',
+          required: ['tenant_id', 'sla_tier', 'check_type'],
+          properties: {
+            tenant_id: { type: 'string', description: 'Tenant ID to check' },
+            sla_tier: { type: 'string', description: 'SLA tier name (e.g., gold, platinum)' },
+            check_type: { type: 'string', enum: ['latency', 'uptime', 'throughput'], description: 'SLA metric to check' },
+          },
+        },
+      },
+      {
+        name: 'manage_api_gateway',
+        description: 'Configure API gateway routing and policies',
+        agentId: 'XAAS',
+        inputSchema: {
+          type: 'object',
+          required: ['action', 'gateway_id', 'config'],
+          properties: {
+            action: { type: 'string', enum: ['route', 'ratelimit', 'auth'], description: 'Gateway management action' },
+            gateway_id: { type: 'string', description: 'API gateway identifier' },
+            config: { type: 'string', description: 'Configuration parameters as JSON string' },
+          },
+        },
+      },
+      {
+        name: 'generate_service_catalog',
+        description: 'List available services and pricing',
+        agentId: 'XAAS',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            category: { type: 'string', description: 'Service category filter (optional)' },
+            tier: { type: 'string', enum: ['starter', 'pro', 'enterprise'], description: 'Tier filter (optional)' },
+          },
+        },
+      },
+      {
+        name: 'deploy_white_label',
+        description: 'Deploy white-label portal for reseller',
+        agentId: 'XAAS',
+        inputSchema: {
+          type: 'object',
+          required: ['reseller_id', 'branding', 'domain', 'services'],
+          properties: {
+            reseller_id: { type: 'string', description: 'Reseller account ID' },
+            branding: { type: 'string', description: 'Branding config as JSON string (logo, colors, name)' },
+            domain: { type: 'string', description: 'Custom domain for the portal' },
+            services: { type: 'array', items: { type: 'string' }, description: 'Services to expose in the portal' },
+          },
+        },
+      },
+    ],
+    resources: [
+      { uri: 'xaas://tenants', name: 'Tenant Accounts', description: 'All tenant accounts with tier and usage data', mimeType: 'application/json' },
+      { uri: 'xaas://sla-status', name: 'SLA Dashboard', description: 'Live SLA compliance status across all tenants', mimeType: 'application/json' },
+      { uri: 'xaas://catalog', name: 'Service Catalog', description: 'Full service catalog with pricing and availability', mimeType: 'application/json' },
+    ],
+    prompts: [
+      {
+        name: 'tenant_onboarding_checklist',
+        description: 'Generate a tenant onboarding checklist for a new account',
+        arguments: [
+          { name: 'tenant_name', description: 'Tenant organization name', required: true },
+          { name: 'tier', description: 'Service tier: starter, pro, or enterprise', required: true },
+        ],
+      },
+      {
+        name: 'sla_breach_report',
+        description: 'Generate an SLA breach report for a tenant over a given period',
+        arguments: [
+          { name: 'tenant_id', description: 'Tenant ID', required: true },
+          { name: 'period', description: 'Reporting period (e.g., last_30d, 2026-10)', required: true },
+        ],
+      },
+    ],
+  },
+
+  // ── 15. Kimi (Moonshot AI) ────────────────────────────────────────────────
   {
     id: 'welloff-kimi',
     name: 'welloff-kimi',
@@ -1454,6 +1833,33 @@ export const SIMULATED_CALLS: Omit<ToolCall, 'id' | 'timestamp'>[] = [
     params: { thresholdGbps: 2.0, vlan: 40, lookbackMinutes: 60 },
     result: { anomaliesDetected: 1, peakGbps: 2.3, vlan: 40, startTime: '2026-10-16T09:14:00Z', sourceIp: '10.40.22.87', recommendation: 'Block source IP pending investigation' },
     latencyMs: 145,
+    status: 'success',
+  },
+  {
+    serverId: 'welloff-infra',
+    toolName: 'optimize_costs',
+    agentId: 'INFRA',
+    params: { provider: 'aws', account_id: 'acct-prod-001', analysis_type: 'rightsizing' },
+    result: { instancesAnalyzed: 14, recommendedDownsize: 11, estimatedMonthlySavings: 2340, topCandidate: 'm5.2xlarge → m5.large (avg CPU 9%)' },
+    latencyMs: 412,
+    status: 'success',
+  },
+  {
+    serverId: 'welloff-plat',
+    toolName: 'deploy_application',
+    agentId: 'PLAT',
+    params: { app_name: 'api-gateway', image: 'registry.welloff.ai/api-gateway:v2.4.1', strategy: 'blue-green', env: 'production' },
+    result: { deploymentId: 'deploy-8471', strategy: 'blue-green', status: 'in_progress', healthCheckUrl: 'https://api.welloff.ai/health', estimatedCompletionMs: 120000 },
+    latencyMs: 334,
+    status: 'success',
+  },
+  {
+    serverId: 'welloff-xaas',
+    toolName: 'provision_tenant',
+    agentId: 'XAAS',
+    params: { tenant_name: 'Acme Corp', tier: 'enterprise', services: ['compute', 'storage', 'database', 'api_gateway', 'monitoring'], region: 'us-east-1' },
+    result: { tenantId: 'tenant-2047', servicesProvisioned: 14, portalUrl: 'https://acmecorp.welloff.ai', adminEmail: 'ops@acmecorp.com', setupCompleteAt: '2026-10-16T10:45:00Z' },
+    latencyMs: 891,
     status: 'success',
   },
 ]

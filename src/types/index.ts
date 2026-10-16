@@ -1,6 +1,6 @@
-export type UserRole = 'agent' | 'developer' | 'land-dev' | 'commercial' | 'non-commercial' | 'tech' | 'robotics' | 'civil-eng' | 'mech-eng' | 'automotive' | 'networking'
+export type UserRole = 'agent' | 'developer' | 'land-dev' | 'commercial' | 'non-commercial' | 'tech' | 'robotics' | 'civil-eng' | 'mech-eng' | 'automotive' | 'networking' | 'iaas' | 'paas' | 'xaas'
 
-export type AgentId = 'ARIA' | 'DEVX' | 'TERRA' | 'CAPITA' | 'NOVA' | 'NEXUS' | 'FORGE' | 'ARCH' | 'VOLT' | 'MOTOR' | 'MESH' | 'TON'
+export type AgentId = 'ARIA' | 'DEVX' | 'TERRA' | 'CAPITA' | 'NOVA' | 'NEXUS' | 'FORGE' | 'ARCH' | 'VOLT' | 'MOTOR' | 'MESH' | 'INFRA' | 'PLAT' | 'XAAS' | 'TON'
 
 export type AgentStatus = 'active' | 'thinking' | 'idle' | 'error'
 
