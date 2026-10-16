@@ -17,6 +17,12 @@ const agentForRole: Record<UserRole, string> = {
   'land-dev': 'TERRA',
   commercial: 'CAPITA',
   'non-commercial': 'NOVA',
+  tech: 'NEXUS',
+  robotics: 'FORGE',
+  'civil-eng': 'ARCH',
+  'mech-eng': 'VOLT',
+  automotive: 'MOTOR',
+  networking: 'MESH',
 }
 
 interface TonRadarDashboardProps {
