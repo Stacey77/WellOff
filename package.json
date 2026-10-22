@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "ai:start": "node src/index.js",
+    "ai:dev": "node --watch src/index.js",
+    "gui": "node src/server.js",
+    "ai:test": "node --test src/**/*.test.js"
   },
   "dependencies": {
     "next": "14.2.3",
