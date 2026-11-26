@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Zap,
   Server,
+  Radio,
 } from 'lucide-react'
 
 const navItems = [
@@ -52,6 +53,12 @@ const navItems = [
     icon: Server,
     label: 'MCP Hub',
     color: '#00d4ff',
+  },
+  {
+    href: '/neural-link',
+    icon: Radio,
+    label: 'Neural Link',
+    color: '#3b82f6',
   },
 ]
 
